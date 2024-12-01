@@ -265,7 +265,7 @@ void Instagram::searchProfile()
         cin.ignore();
         if (choice == 1)
         {
-            // addfriend(username);
+            addfriend(userNode->user->getusername());
         }
         else
         {
@@ -331,7 +331,7 @@ void Instagram::home(string username)
     }
     else if (choice == 6)
     {
-        // activeuser->user->showRequests();
+        activeuser->user->showRequests(connections);
         cout << "Press 1 to go back to home" << endl;
         int choice;
         cin >> choice;
@@ -365,17 +365,13 @@ void Instagram::addConnection(User *user1, User *user2)
     int index2 = getuserindex(user2->getusername());
     if (index1 != -1 && index2 != -1)
     {
-        connections[index1][index2] = 1;
-        user1->sendRequest(connections, index1, index2, user2);
+        user1->sendRequest(user1->getusername(), index1, index2, connections);
     }
 }
 
 //// ====== add friend ======== ///////////
-void Instagram::addfriend()
+void Instagram::addfriend(string username)
 {
-    string username;
-    cout << "Enter username: ";
-    getline(cin, username);
     BSTNode *userNode = bst->search(username);
     if (userNode != nullptr)
     {

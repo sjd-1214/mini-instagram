@@ -143,3 +143,12 @@ void User::getLatestPost()
 {
     post_stack.peek();
 }
+
+void User::sendRequest(string sender, int senderIndex, int receiverIndex, int **Connection)
+{
+    request_list.addRequest(sender, senderIndex, receiverIndex, Connection);
+}
+void User::showRequests(int **Connection)
+{
+    request_list.showRequests(Connection);
+}

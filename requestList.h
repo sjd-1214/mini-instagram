@@ -1,23 +1,30 @@
 #pragma once
-#include <iostream>
 #include <string>
 using namespace std;
+
+const int MAX_RECEIVERS = 100; // Maximum number of receivers
 
 struct RequestNode
 {
     string friend_username;
-    bool is_pending;
-    RequestNode(string);
+    int senderIndex; // Index of the user who sent the request
+    RequestNode *next;
 };
 
 class RequestList
 {
 private:
-RequestNode* front;
-RequestNode* back;
+    RequestNode *front;
+    RequestNode *rear;
+    int receiverIndices[MAX_RECEIVERS];
+    int receiverCount;
+
+    void deleteRequest(RequestNode *prev, RequestNode *current);
+
 public:
     RequestList();
-    void bulkRequestAccept();
-    void acceptRequest();
-    void makeRequest();
+    ~RequestList();
+
+    void addRequest(const string &username, int senderIndex, int receiverIndex, int **Connection);
+    void showRequests(int **Connection);
 };
