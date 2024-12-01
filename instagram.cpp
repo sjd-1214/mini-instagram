@@ -114,3 +114,43 @@ void Instagram::createAccount()
     cout << "Yahoooo You Made it!! " << endl;
     cout << "Welcome To Instagram" << endl;
 }
+
+///======= Search =======///
+bool Instagram::search(string username)
+{
+    BSTNode *userNode = bst->search(username);
+    return userNode != nullptr;
+}
+//////////////////////////////////////////////////////
+
+///======= Log In ======= ///
+BSTNode *activeuser;
+void Insta::signin()
+{
+    string username;
+    string password;
+    cout << "Enter username: ";
+    getline(cin, username);
+    cout << "Enter password: ";
+    getline(cin, password);
+    bool is_valid = false;
+
+    BSTNode *userNode = bst->search(username);
+
+    if (userNode != nullptr && userNode->user->getpassword() == password)
+    {
+        activeuser = userNode;
+        time_t now = time(0);
+        userNode->user->setlast_sign_in(ctime(&now));
+        is_valid = true;
+    }
+
+    if (is_valid)
+    {
+        home(username);
+    }
+    else
+    {
+        cout << "Invalid username or password" << endl;
+    }
+}
