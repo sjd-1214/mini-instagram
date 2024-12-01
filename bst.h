@@ -9,7 +9,6 @@ public:
     User *user;
     BSTNode *left;
     BSTNode *right;
-
     BSTNode(User *user);
 };
 
