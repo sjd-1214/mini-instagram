@@ -23,6 +23,9 @@ public:
     void searchProfile();
     void resetpassword();
     void setActiveUser(BSTNode *activeuser);
+    void addfriend();
+    int getuserindex(string username);
+    void addConnection(User *user1, User *user2);
     bool search(string username);
     int **updateConnections();
     void signout();

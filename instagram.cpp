@@ -346,3 +346,44 @@ void Instagram::home(string username)
         home(activeuser->user->getusername());
     }
 }
+//// ===== get user index ======== //////
+int Instagram::getuserindex(string username)
+{
+    for (int i = 0; i < user_count; i++)
+    {
+        if (username == user[i].getusername())
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+///// ===== add connection ======== //////
+void Instagram::addConnection(User *user1, User *user2)
+{
+    int index1 = getuserindex(user1->getusername());
+    int index2 = getuserindex(user2->getusername());
+    if (index1 != -1 && index2 != -1)
+    {
+        connections[index1][index2] = 1;
+        user1->sendRequest(connections, index1, index2, user2);
+    }
+}
+
+//// ====== add friend ======== ///////////
+void Instagram::addfriend()
+{
+    string username;
+    cout << "Enter username: ";
+    getline(cin, username);
+    BSTNode *userNode = bst->search(username);
+    if (userNode != nullptr)
+    {
+        addConnection(activeuser->user, userNode->user);
+        cout << "Request Sent" << endl;
+    }
+    else
+    {
+        cout << "User not found" << endl;
+    }
+}
