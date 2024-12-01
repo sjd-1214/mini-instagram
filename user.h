@@ -44,4 +44,6 @@ public:
     string getDOB();
 
     /////////// Functions /////////////////
+    bool verifySecurityAnswers();
+    void setSecurityAnswers();
 };
