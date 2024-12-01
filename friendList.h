@@ -5,15 +5,17 @@ using namespace std;
 
 struct FriendNode
 {
-    string relation;
     string friend_username;
-    FriendNode();
-    FriendNode(string f_name, string rel);
+    FriendNode(string);
 
 };
 
 class FriendList
 {
 private:
+    FriendNode* top;
 public:
+    FriendList();
+    FriendNode* getTop()const;
+    void addFriend();
 };

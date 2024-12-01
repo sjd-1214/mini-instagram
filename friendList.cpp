@@ -1,11 +1,13 @@
 #include "friendList.h"
 
-FriendNode :: FriendNode(){
-    friend_username = "";
-    relation = "";
+FriendNode :: FriendNode(string f_name) {
+    friend_username = f_name;
 }
 
-FriendNode :: FriendNode(string f_name,string rel) {
-    friend_username = f_name;
-    relation = rel;
+FriendList :: FriendList(){
+    top = nullptr;
+}
+
+FriendNode* FriendList :: getTop() const{
+    return top;
 }
