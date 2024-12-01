@@ -1,4 +1,48 @@
 #include "instagram.h"
+///======== Constructor ===========///
+Instagram::Instagram()
+{
+    user_count = 0;
+    bst = new BST();
+    connections = nullptr;
+    user = nullptr;
+}
+//////////////////////////////////////////
+/////////////////////////////////////////
+///////////////////////////////////////
+///======= Update Connections =======///
+int **Instagram::updateConnections()
+{
+    int **temp_connections = new int *[user_count];
+    for (int i = 0; i < user_count; i++)
+    {
+        temp_connections[i] = new int[user_count];
+        for (int j = 0; j < user_count; j++)
+        {
+            temp_connections[i][j] = 0;
+        }
+    }
+    if (connections != nullptr)
+    {
+        for (int i = 0; i < user_count - 1; i++)
+        {
+            for (int j = 0; j < user_count - 1; j++)
+            {
+                temp_connections[i][j] = connections[i][j];
+            }
+        }
+        for (int i = 0; i < user_count - 1; i++)
+        {
+            delete[] connections[i];
+        }
+        delete[] connections;
+    }
+
+    return temp_connections;
+}
+//////////////////////////////////////////
+/////////////////////////////////////////
+///////////////////////////////////////
 ///======= Show Menu ======= ///
 void Instagram::showMenu()
 {
@@ -28,6 +72,9 @@ void Instagram::showMenu()
         break;
     }
 }
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 ///======= Create Account ======= ///
 void Instagram::createAccount()
 {
@@ -109,23 +156,27 @@ void Instagram::createAccount()
     cout << "Let's Secure Your Account" << endl;
     newUser->setSecurityAnswers();
     bst->insert(newUser);
-    user[user_count] = *newUser;
     user_count++;
+    connections = updateConnections();
     cout << "Yahoooo You Made it!! " << endl;
     cout << "Welcome To Instagram" << endl;
+    setActiveUser(bst->search(username));
+    home(username);
 }
-
-///======= Search =======///
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+/// ======= Search ======= ///
 bool Instagram::search(string username)
 {
     BSTNode *userNode = bst->search(username);
     return userNode != nullptr;
 }
-//////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 ///======= Log In ======= ///
-BSTNode *activeuser;
-void Insta::signin()
+void Instagram::logIn()
 {
     string username;
     string password;
@@ -147,10 +198,151 @@ void Insta::signin()
 
     if (is_valid)
     {
+        cout << "Login successfull!!" << endl;
+        setActiveUser(bst->search(username));
         home(username);
     }
     else
     {
         cout << "Invalid username or password" << endl;
+    }
+}
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+/////////// Reset Password //////////
+void Instagram::resetpassword()
+{
+    if (activeuser->user->verifySecurityAnswers())
+    {
+        string password;
+        cout << "Enter new password: ";
+        getline(cin, password);
+        while (!validate_strong_password(password) || password == activeuser->user->getpassword())
+        {
+            cout << "Please enter a new and strong password: ";
+            getline(cin, password);
+        }
+        activeuser->user->setpassword(password);
+        cout << "Password updated successfully." << endl;
+        cout << "Press 1 to go back to home" << endl;
+        int choice;
+        cin >> choice;
+        if (choice == 1)
+        {
+            home(activeuser->user->getusername());
+        }
+    }
+    else
+    {
+        cout << "Invalid Security Answers" << endl;
+    }
+}
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///======= search Profile ======= ///
+void Instagram::searchProfile()
+{
+    string username;
+    cout << "Enter username: ";
+    getline(cin, username);
+    int choice;
+    // Search for the user in the BST
+    BSTNode *userNode = bst->search(username);
+    if (userNode != nullptr)
+    {
+        // User found
+        cout << "+----------------------- User Profile--------------------------+" << endl;
+        cout << "First Name: " << userNode->user->getfirst_name() << endl;
+        cout << "Last Name: " << userNode->user->getlast_name() << endl;
+        cout << "Username: " << userNode->user->getusername() << endl;
+        cout << "+-------------------------------------------------+" << endl;
+        cout << "1. Add Friend" << endl;
+        cout << "2. Back" << endl;
+        cout << "Enter Your Choice: ";
+        cin >> choice;
+        cin.ignore();
+        if (choice == 1)
+        {
+            // addfriend(username);
+        }
+        else
+        {
+            home(activeuser->user->getusername());
+        }
+    }
+    else
+    {
+        cout << "User Not Found!!" << endl;
+    }
+}
+/// === Set Active User === ///
+void Instagram::setActiveUser(BSTNode *activeuser)
+{
+    this->activeuser = activeuser;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///================================ Sign Out=============================== ///
+void Instagram::signout()
+{
+    cout << "You have been signed out" << endl;
+    showMenu();
+}
+///================================ Home ================================= ///
+void Instagram::home(string username)
+{
+    int choice;
+    string post;
+    string date;
+    cout << "welcome " << username << endl;
+    cout << "1. Search User" << endl;
+    cout << "2. Sign Out" << endl;
+    cout << "3. New Post" << endl;
+    cout << "4. Show Recent Post" << endl;
+    cout << "5. Reset Password" << endl;
+    cout << "6. Show Requests" << endl;
+    cout << "Enter Choice:";
+    cin >> choice;
+    cin.ignore();
+    if (choice == 1)
+    {
+        searchProfile();
+    }
+    else if (choice == 2)
+    {
+        signout();
+    }
+    else if (choice == 3)
+    {
+        activeuser->user->newPost();
+        home(username);
+    }
+    else if (choice == 4)
+    {
+        activeuser->user->getLatestPost();
+    }
+    else if (choice == 5)
+    {
+        resetpassword();
+    }
+    else if (choice == 6)
+    {
+        // activeuser->user->showRequests();
+        cout << "Press 1 to go back to home" << endl;
+        int choice;
+        cin >> choice;
+        if (choice == 1)
+        {
+            home(activeuser->user->getusername());
+        }
+    }
+    else
+    {
+        cout << "Invalid choice" << endl;
+        home(activeuser->user->getusername());
     }
 }

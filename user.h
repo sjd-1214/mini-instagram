@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include "post.h"
 using namespace std;
 
 class User
@@ -15,6 +16,7 @@ private:
     char gender;
     string last_sign_in;
     string DOB;
+    PostStack post_stack;
     string security_answers[3];
     string security_questions[3];
 
@@ -31,6 +33,8 @@ public:
     void setlast_sign_in(string);
     void setgender(char);
     void setDOB(string);
+    void newPost();
+    void getLatestPost();
 
     ////// Getters ///////
     string getfirst_name();
@@ -39,9 +43,10 @@ public:
     string getusername();
     string getpassword();
     string getemail();
-    bool verifySecurityAnswers();
     char getgender();
     string getDOB();
 
     /////////// Functions /////////////////
+    bool verifySecurityAnswers();
+    void setSecurityAnswers();
 };
