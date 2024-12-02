@@ -44,7 +44,6 @@ public:
     void resetpassword();
     void setActiveUser(BSTNode *activeuser);
     void addfriend(string username);
-    void buildFriendList();
     void showFriendList();
     int getuserindex(string username);
     void showConnections();

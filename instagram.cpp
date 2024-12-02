@@ -342,6 +342,7 @@ void Instagram::home(string username)
     else if (choice == 3)
     {
         activeuser->user->newPost();
+
         home(username);
     }
     else if (choice == 4)
@@ -378,7 +379,6 @@ void Instagram::home(string username)
     }
     else if (choice == 7)
     {
-        buildFriendList();
         showFriendList();
         cout << "Press 1 to go back to home" << endl;
         int choice;
@@ -497,25 +497,6 @@ void Instagram::showConnections()
     }
 }
 
-void Instagram::buildFriendList()
-{
-    if (connections == nullptr)
-    {
-        cout << "Error: Connection matrix not initialized" << endl;
-        return;
-    }
-
-    int activeUserIndex = getuserindex(activeuser->user->getusername());
-
-    activeuser->user->clearFriendList();
-    for (int j = 0; j < user_count; j++)
-    {
-        if (connections[activeUserIndex][j] == 1)
-        {
-            activeuser->user->addFriend(user[j].getusername());
-        }
-    }
-}
 void Instagram::showFriendList()
 {
     if (activeuser == nullptr)
