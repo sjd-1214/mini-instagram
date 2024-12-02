@@ -3,7 +3,7 @@
 using namespace std;
 
 // Constructor
-RequestList::RequestList() : front(nullptr), rear(nullptr), receiverCount(0) {}
+RequestList::RequestList() : front(nullptr), rear(nullptr) {}
 
 // Destructor
 RequestList::~RequestList()
@@ -14,36 +14,26 @@ RequestList::~RequestList()
         front = front->next;
         delete temp;
     }
-}
-
-// Helper function to delete a request
-void RequestList::deleteRequest(RequestNode *prev, RequestNode *current)
-{
-    if (prev == nullptr)
-    { // Deleting the front node
-        front = current->next;
-    }
-    else
-    {
-        prev->next = current->next;
-    }
-    if (current == rear)
-    { // If it's the rear node
-        rear = prev;
-    }
-    delete current;
+    rear = nullptr;
 }
 
 // Add a new request (one-way connection)
 void RequestList::addRequest(const string &username, int senderIndex, int receiverIndex, int **Connection)
 {
-    if (receiverCount >= MAX_RECEIVERS)
+    // Validate indices
+    if (senderIndex < 0 || receiverIndex < 0 || !Connection)
     {
-        cout << "Maximum receiver limit reached. Cannot add more requests.\n";
+        cout << "Invalid parameters provided.\n";
         return;
     }
 
-    RequestNode *newNode = new RequestNode{username, senderIndex, nullptr};
+    // Create new node with all three pieces of information
+    RequestNode *newNode = new RequestNode{
+        username,
+        senderIndex,
+        receiverIndex,
+        nullptr};
+
     if (rear == nullptr)
     {
         front = rear = newNode;
@@ -53,66 +43,133 @@ void RequestList::addRequest(const string &username, int senderIndex, int receiv
         rear->next = newNode;
         rear = newNode;
     }
-    Connection[senderIndex][receiverIndex] = 1;       // One-way connection for the request
-    receiverIndices[receiverCount++] = receiverIndex; // Track the receiver index
+
+    Connection[senderIndex][receiverIndex] = 1; // One-way connection for the request
+    cout << "Request added successfully.\n";
 }
 
-// Show requests and handle accept/reject actions
-void RequestList::showRequests(int **Connection)
+// Show all pending requests
+void RequestList::displayAllRequests()
 {
-    if (receiverCount == 0)
+    if (front == nullptr)
     {
         cout << "No pending requests.\n";
         return;
     }
 
-    for (int i = 0; i < receiverCount; ++i)
+    cout << "\nAll Pending Requests:\n";
+    RequestNode *current = front;
+    int count = 1;
+
+    while (current != nullptr)
     {
-        int receiverIndex = receiverIndices[i];
-        RequestNode *temp = front;
-        RequestNode *prev = nullptr;
+        cout << count++ << ". Request to: " << current->receiverIndex
+             << " from: " << current->friend_username
+             << " (Sender Index: " << current->senderIndex << ")\n";
+        current = current->next;
+    }
+    cout << endl;
+}
 
-        while (temp != nullptr)
+void RequestList::processTopRequest(int **Connection)
+{
+    if (!Connection)
+    {
+        cout << "Invalid connection matrix.\n";
+        return;
+    }
+
+    if (front == nullptr)
+    {
+        cout << "No pending requests.\n";
+        return;
+    }
+
+    displayAllRequests();
+
+    cout << "Processing topmost request:\n";
+    cout << "Request to: " << front->receiverIndex
+         << " from: " << front->friend_username
+         << " (Sender Index: " << front->senderIndex << ")\n";
+
+    bool validChoice = false;
+    int choice;
+
+    do
+    {
+        cout << "1. Accept\n2. Reject\nChoice: ";
+        if (!(cin >> choice))
         {
-            cout << "Request to: " << receiverIndex
-                 << " from: " << temp->friend_username
-                 << " (Sender Index: " << temp->senderIndex << ")" << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input. Please enter 1 or 2.\n";
+            continue;
+        }
+        validChoice = (choice == 1 || choice == 2);
+        if (!validChoice)
+        {
+            cout << "Invalid choice. Please enter 1 or 2.\n";
+        }
+    } while (!validChoice);
 
-            // Show menu
-            cout << "1. Accept\n2. Reject\nChoice: ";
-            int choice;
-            cin >> choice;
+    if (choice == 1)
+    {
+        if (front->senderIndex >= 0 && front->receiverIndex >= 0)
+        {
+            Connection[front->senderIndex][front->receiverIndex] = 1;
+            Connection[front->receiverIndex][front->senderIndex] = 1;
+            cout << "Request accepted. Bidirectional connection established.\n";
 
-            if (choice == 1)
-            {                                                     // Accept request
-                Connection[temp->senderIndex][receiverIndex] = 1; // Ensure the original one-way connection
-                Connection[receiverIndex][temp->senderIndex] = 1; // Create the bidirectional connection
+            // Debug output to verify matrix update
+            cout << "Debug - Connection matrix values:" << endl;
+            cout << "Connection[" << front->senderIndex << "][" << front->receiverIndex << "] = "
+                 << Connection[front->senderIndex][front->receiverIndex] << endl;
+            cout << "Connection[" << front->receiverIndex << "][" << front->senderIndex << "] = "
+                 << Connection[front->receiverIndex][front->senderIndex] << endl;
+        }
+        else
+        {
+            cout << "Error: Invalid indices in connection request.\n";
+        }
+    }
+    else
+    {
+        cout << "Request rejected.\n";
+    }
 
-                cout << "Request accepted. Bidirectional connection established.\n";
+    RequestNode *temp = front;
+    front = front->next;
+    if (front == nullptr)
+    {
+        rear = nullptr;
+    }
+    delete temp;
+}
 
-                // Delete the current request
-                RequestNode *toDelete = temp;
-                temp = temp->next;
-                deleteRequest(prev, toDelete);
-                break; // Move to next receiver
-            }
-            else if (choice == 2)
-            { // Reject request
-                cout << "Request rejected.\n";
+// Show requests and handle accept/reject actions one at a time
+void RequestList::showRequests(int **Connection)
+{
+    if (!Connection)
+    {
+        cout << "Invalid connection matrix.\n";
+        return;
+    }
 
-                // Delete the current request
-                RequestNode *toDelete = temp;
-                temp = temp->next;
-                deleteRequest(prev, toDelete);
-                break; // Move to next receiver
-            }
-            else
+    while (front != nullptr)
+    {
+        processTopRequest(Connection);
+        cout << "\nRemaining requests:\n";
+        displayAllRequests();
+
+        if (front != nullptr)
+        {
+            char continue_choice;
+            cout << "Process next request? (y/n): ";
+            cin >> continue_choice;
+            if (tolower(continue_choice) != 'y')
             {
-                cout << "Invalid choice. Moving to next request.\n";
-                prev = temp;
-                temp = temp->next;
+                break;
             }
         }
     }
-    receiverCount = 0;
 }

@@ -6,6 +6,7 @@ Instagram::Instagram()
     bst = new BST();
     connections = nullptr;
     user = nullptr;
+    activeuser = nullptr;
 }
 //////////////////////////////////////////
 /////////////////////////////////////////
@@ -13,6 +14,9 @@ Instagram::Instagram()
 ///======= Update Connections =======///
 int **Instagram::updateConnections()
 {
+    if (user_count <= 0)
+        return nullptr;
+
     int **temp_connections = new int *[user_count];
     for (int i = 0; i < user_count; i++)
     {
@@ -22,16 +26,19 @@ int **Instagram::updateConnections()
             temp_connections[i][j] = 0;
         }
     }
+
     if (connections != nullptr)
     {
-        for (int i = 0; i < user_count - 1; i++)
+        int oldSize = user_count - 1;
+        for (int i = 0; i < oldSize; i++)
         {
-            for (int j = 0; j < user_count - 1; j++)
+            for (int j = 0; j < oldSize; j++)
             {
                 temp_connections[i][j] = connections[i][j];
             }
         }
-        for (int i = 0; i < user_count - 1; i++)
+
+        for (int i = 0; i < oldSize; i++)
         {
             delete[] connections[i];
         }
@@ -49,7 +56,8 @@ void Instagram::showMenu()
     int choice;
     cout << "1. Create Account" << endl;
     cout << "2. Log In" << endl;
-    cout << "3. Exit" << endl;
+    cout << "3. show connections" << endl;
+    cout << "4. Exit" << endl;
     cout << "Enter your choice: ";
     cin >> choice;
     while (cin.fail() || choice < 1 || choice > 3)
@@ -59,6 +67,7 @@ void Instagram::showMenu()
         cout << "Invalid input!! Please try again: ";
         cin >> choice;
     }
+    cin.ignore();
     switch (choice)
     {
     case 1:
@@ -68,6 +77,10 @@ void Instagram::showMenu()
         logIn();
         break;
     case 3:
+        showConnections();
+        showMenu();
+        break;
+    case 4:
         cout << "Goodbye!" << endl;
         break;
     }
@@ -157,7 +170,11 @@ void Instagram::createAccount()
     newUser->setSecurityAnswers();
     bst->insert(newUser);
     user_count++;
-    connections = updateConnections();
+    int **new_connections = updateConnections();
+    if (new_connections != nullptr)
+    {
+        connections = new_connections;
+    }
     cout << "Yahoooo You Made it!! " << endl;
     cout << "Welcome To Instagram" << endl;
     setActiveUser(bst->search(username));
@@ -349,37 +366,84 @@ void Instagram::home(string username)
 //// ===== get user index ======== //////
 int Instagram::getuserindex(string username)
 {
-    for (int i = 0; i < user_count; i++)
-    {
-        if (username == user[i].getusername())
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-///// ===== add connection ======== //////
-void Instagram::addConnection(User *user1, User *user2)
-{
-    int index1 = getuserindex(user1->getusername());
-    int index2 = getuserindex(user2->getusername());
-    if (index1 != -1 && index2 != -1)
-    {
-        user1->sendRequest(user1->getusername(), index1, index2, connections);
-    }
+    int current_index = 0;
+    BSTNode *node = bst->getRoot();
+    return findIndexInBST(node, username, current_index);
 }
 
-//// ====== add friend ======== ///////////
+//// ========= add friend ======== ///////////
 void Instagram::addfriend(string username)
 {
-    BSTNode *userNode = bst->search(username);
-    if (userNode != nullptr)
+    if (activeuser == nullptr)
     {
-        addConnection(activeuser->user, userNode->user);
-        cout << "Request Sent" << endl;
+        cout << "No active user session!" << endl;
+        return;
     }
-    else
+
+    BSTNode *userNode = bst->search(username);
+    if (userNode == nullptr)
     {
         cout << "User not found" << endl;
+        return;
+    }
+
+    if (username == activeuser->user->getusername())
+    {
+        cout << "Cannot send request to yourself!" << endl;
+        return;
+    }
+
+    if (connections == nullptr)
+    {
+        cout << "Error: Connection matrix not initialized" << endl;
+        return;
+    }
+
+    int senderIndex = getuserindex(activeuser->user->getusername());
+    int receiverIndex = getuserindex(username);
+
+    if (senderIndex == -1 || receiverIndex == -1)
+    {
+        cout << "Error: Could not determine user indices" << endl;
+        return;
+    }
+
+    if (senderIndex >= user_count || receiverIndex >= user_count)
+    {
+        cout << "Error: Invalid user indices" << endl;
+        return;
+    }
+
+    if (connections[senderIndex][receiverIndex] == 1 || connections[receiverIndex][senderIndex] == 1)
+    {
+        cout << "Connection already exists!" << endl;
+        return;
+    }
+
+    userNode->user->sendRequest(activeuser->user->getusername(),
+                                senderIndex, receiverIndex, connections);
+
+    cout << "Debug - Initial connection status:" << endl;
+    cout << "connections[" << senderIndex << "][" << receiverIndex << "] = "
+         << connections[senderIndex][receiverIndex] << endl;
+
+    home(activeuser->user->getusername());
+}
+
+void Instagram::showConnections()
+{
+    if (connections == nullptr)
+    {
+        cout << "Error: Connection matrix not initialized" << endl;
+        return;
+    }
+
+    for (int i = 0; i < user_count; i++)
+    {
+        for (int j = 0; j < user_count; j++)
+        {
+            cout << connections[i][j] << " ";
+        }
+        cout << endl;
     }
 }
