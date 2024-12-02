@@ -2,10 +2,8 @@
 #include <iostream>
 using namespace std;
 
-// Constructor
 RequestList::RequestList() : front(nullptr), rear(nullptr) {}
 
-// Destructor
 RequestList::~RequestList()
 {
     while (front != nullptr)
@@ -17,17 +15,15 @@ RequestList::~RequestList()
     rear = nullptr;
 }
 
-// Add a new request (one-way connection)
 void RequestList::addRequest(const string &username, int senderIndex, int receiverIndex, int **Connection)
 {
-    // Validate indices
+
     if (senderIndex < 0 || receiverIndex < 0 || !Connection)
     {
         cout << "Invalid parameters provided.\n";
         return;
     }
 
-    // Create new node with all three pieces of information
     RequestNode *newNode = new RequestNode{
         username,
         senderIndex,
@@ -44,11 +40,10 @@ void RequestList::addRequest(const string &username, int senderIndex, int receiv
         rear = newNode;
     }
 
-    Connection[senderIndex][receiverIndex] = 1; // One-way connection for the request
+    Connection[senderIndex][receiverIndex] = 1;
     cout << "Request added successfully.\n";
 }
 
-// Show all pending requests
 void RequestList::displayAllRequests()
 {
     if (front == nullptr)
@@ -57,119 +52,171 @@ void RequestList::displayAllRequests()
         return;
     }
 
-    cout << "\nAll Pending Requests:\n";
+    cout << "\nPending Requests:\n";
     RequestNode *current = front;
     int count = 1;
-
     while (current != nullptr)
     {
-        cout << count++ << ". Request to: " << current->receiverIndex
-             << " from: " << current->friend_username
-             << " (Sender Index: " << current->senderIndex << ")\n";
+        cout << count++ << ". Request from: " << current->friend_username << endl;
         current = current->next;
     }
     cout << endl;
 }
 
-void RequestList::processTopRequest(int **Connection)
+int *RequestList::showRequests(int **Connection, int &acceptedCount)
 {
-    if (!Connection)
+    if (!Connection || front == nullptr)
     {
-        cout << "Invalid connection matrix.\n";
-        return;
-    }
-
-    if (front == nullptr)
-    {
-        cout << "No pending requests.\n";
-        return;
+        acceptedCount = 0;
+        return nullptr;
     }
 
     displayAllRequests();
 
-    cout << "Processing topmost request:\n";
-    cout << "Request to: " << front->receiverIndex
-         << " from: " << front->friend_username
-         << " (Sender Index: " << front->senderIndex << ")\n";
-
-    bool validChoice = false;
-    int choice;
-
-    do
-    {
-        cout << "1. Accept\n2. Reject\nChoice: ";
-        if (!(cin >> choice))
-        {
-            cin.clear();
-            cin.ignore(1000, '\n');
-            cout << "Invalid input. Please enter 1 or 2.\n";
-            continue;
-        }
-        validChoice = (choice == 1 || choice == 2);
-        if (!validChoice)
-        {
-            cout << "Invalid choice. Please enter 1 or 2.\n";
-        }
-    } while (!validChoice);
-
-    if (choice == 1)
-    {
-        if (front->senderIndex >= 0 && front->receiverIndex >= 0)
-        {
-            Connection[front->senderIndex][front->receiverIndex] = 1;
-            Connection[front->receiverIndex][front->senderIndex] = 1;
-            cout << "Request accepted. Bidirectional connection established.\n";
-
-            // Debug output to verify matrix update
-            cout << "Debug - Connection matrix values:" << endl;
-            cout << "Connection[" << front->senderIndex << "][" << front->receiverIndex << "] = "
-                 << Connection[front->senderIndex][front->receiverIndex] << endl;
-            cout << "Connection[" << front->receiverIndex << "][" << front->senderIndex << "] = "
-                 << Connection[front->receiverIndex][front->senderIndex] << endl;
-        }
-        else
-        {
-            cout << "Error: Invalid indices in connection request.\n";
-        }
-    }
-    else
-    {
-        cout << "Request rejected.\n";
-    }
-
+    int requestCount = 0;
     RequestNode *temp = front;
-    front = front->next;
-    if (front == nullptr)
+    while (temp != nullptr)
     {
-        rear = nullptr;
-    }
-    delete temp;
-}
-
-// Show requests and handle accept/reject actions one at a time
-void RequestList::showRequests(int **Connection)
-{
-    if (!Connection)
-    {
-        cout << "Invalid connection matrix.\n";
-        return;
+        requestCount++;
+        temp = temp->next;
     }
 
-    while (front != nullptr)
-    {
-        processTopRequest(Connection);
-        cout << "\nRemaining requests:\n";
-        displayAllRequests();
+    AcceptedRequest *acceptedRequests = new AcceptedRequest[requestCount];
+    acceptedCount = 0;
 
-        if (front != nullptr)
+    cout << "Choose processing method:\n";
+    cout << "1. Process all requests\n";
+    cout << "2. Process by index\n";
+    cout << "3. Process one by one\n";
+
+    int method;
+    cin >> method;
+    cin.ignore();
+
+    switch (method)
+    {
+    case 1:
+    {
+        cout << "1. Accept all\n2. Reject all\nChoice: ";
+        int choice;
+        cin >> choice;
+
+        while (front != nullptr)
         {
-            char continue_choice;
-            cout << "Process next request? (y/n): ";
-            cin >> continue_choice;
-            if (tolower(continue_choice) != 'y')
+            if (choice == 1)
             {
+                Connection[front->senderIndex][front->receiverIndex] = 1;
+                Connection[front->receiverIndex][front->senderIndex] = 1;
+                acceptedRequests[acceptedCount++].senderIndex = front->senderIndex;
+            }
+            RequestNode *toDelete = front;
+            front = front->next;
+            delete toDelete;
+        }
+        rear = nullptr;
+        break;
+    }
+
+    case 2:
+    {
+        cout << "Enter request indices to process (0 to finish):\n";
+        int *indices = new int[requestCount]; // Dynamically allocated array
+        int idx, indexCount = 0;
+
+        while (true)
+        {
+            cin >> idx;
+            if (idx == 0)
                 break;
+            if (idx > 0 && idx <= requestCount)
+            {
+                indices[indexCount++] = idx - 1;
             }
         }
+
+        cout << "1. Accept selected\n2. Reject selected\nChoice: ";
+        int choice;
+        cin >> choice;
+
+        for (int i = 0; i < indexCount; i++)
+        {
+            RequestNode *current = front;
+            RequestNode *prev = nullptr;
+            int currentIdx = 0;
+
+            while (current && currentIdx < indices[i])
+            {
+                prev = current;
+                current = current->next;
+                currentIdx++;
+            }
+
+            if (current)
+            {
+                if (choice == 1)
+                {
+                    Connection[current->senderIndex][current->receiverIndex] = 1;
+                    Connection[current->receiverIndex][current->senderIndex] = 1;
+                    acceptedRequests[acceptedCount++].senderIndex = current->senderIndex;
+                }
+
+                if (prev)
+                    prev->next = current->next;
+                else
+                    front = current->next;
+
+                if (current == rear)
+                    rear = prev;
+                delete current;
+            }
+        }
+
+        delete[] indices; // Free dynamically allocated memory
+        break;
     }
+
+    case 3:
+    {
+        while (front != nullptr)
+        {
+            bool currentRequestAccepted = false;
+            cout << "Processing request from: " << front->friend_username << endl;
+            cout << "1. Accept\n2. Reject\nChoice: ";
+            int choice;
+            cin >> choice;
+
+            if (choice == 1)
+            {
+                Connection[front->senderIndex][front->receiverIndex] = 1;
+                Connection[front->receiverIndex][front->senderIndex] = 1;
+                acceptedRequests[acceptedCount++].senderIndex = front->senderIndex;
+            }
+
+            RequestNode *toDelete = front;
+            front = front->next;
+            if (front == nullptr)
+                rear = nullptr;
+            delete toDelete;
+
+            if (front != nullptr)
+            {
+                cout << "Process next? (y/n): ";
+                char cont;
+                cin >> cont;
+                if (tolower(cont) != 'y')
+                    break;
+            }
+        }
+        break;
+    }
+    }
+
+    int *senderIndices = new int[acceptedCount];
+    for (int i = 0; i < acceptedCount; i++)
+    {
+        senderIndices[i] = acceptedRequests[i].senderIndex;
+    }
+
+    delete[] acceptedRequests;
+    return senderIndices;
 }

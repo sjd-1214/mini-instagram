@@ -327,6 +327,7 @@ void Instagram::home(string username)
     cout << "6. Show Requests" << endl;
     cout << "7. Show Friend List" << endl;
     cout << "8. Show Suggestions" << endl;
+    cout << "9. Show Notifications" << endl;
     cout << "Enter Choice:";
     cin >> choice;
     cin.ignore();
@@ -353,7 +354,20 @@ void Instagram::home(string username)
     }
     else if (choice == 6)
     {
-        activeuser->user->showRequests(connections);
+        int acceptedCount = 0;
+        int *accepted_indices = activeuser->user->showRequests(connections, acceptedCount);
+
+        if (accepted_indices != nullptr)
+        {
+            for (int i = 0; i < acceptedCount; i++)
+            {
+                string sender_username = getUsernameByIndex(accepted_indices[i]);
+                bst->search(sender_username)->user->sendNotifications("accepted", activeuser->user->getusername());
+                activeuser->user->addFriend(sender_username);
+            }
+            delete[] accepted_indices;
+        }
+
         cout << "Press 1 to go back to home" << endl;
         int choice;
         cin >> choice;
@@ -384,6 +398,11 @@ void Instagram::home(string username)
         {
             home(activeuser->user->getusername());
         }
+    }
+    else if (choice == 9)
+    {
+        showNotifiactions();
+        home(activeuser->user->getusername());
     }
     else
     {
@@ -450,10 +469,12 @@ void Instagram::addfriend(string username)
 
     userNode->user->sendRequest(activeuser->user->getusername(),
                                 senderIndex, receiverIndex, connections);
+    userNode->user->sendNotifications("request", activeuser->user->getusername());
+    activeuser->user->addFriend(username);
 
-    cout << "Debug - Initial connection status:" << endl;
-    cout << "connections[" << senderIndex << "][" << receiverIndex << "] = "
-         << connections[senderIndex][receiverIndex] << endl;
+    // cout << "Debug - Initial connection status:" << endl;
+    // cout << "connections[" << senderIndex << "][" << receiverIndex << "] = "
+    //      << connections[senderIndex][receiverIndex] << endl;
 
     home(activeuser->user->getusername());
 }
@@ -665,4 +686,8 @@ BSTNode *Instagram::findUserNodeByIndex(BSTNode *root, int target_index, int &cu
     current_index++;
 
     return findUserNodeByIndex(root->right, target_index, current_index);
+}
+void Instagram::showNotifiactions()
+{
+    activeuser->user->showNotifications();
 }

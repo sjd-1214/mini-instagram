@@ -4,6 +4,7 @@
 #include <ctime>
 #include "post.h"
 #include "requestList.h"
+#include "notificationList.h"
 #include "friendList.h"
 using namespace std;
 
@@ -21,6 +22,7 @@ private:
     PostStack post_stack;
     RequestList request_list;
     FriendList friend_list;
+    NotificationList notification_list;
     string security_answers[3];
     string security_questions[3];
 
@@ -58,10 +60,14 @@ public:
 
     // === Request Functions === //
     void sendRequest(string sender, int senderIndex, int receiverIndex, int **Connection);
-    void showRequests(int **Connection);
+    int *showRequests(int **Connection, int &is_accepted);
 
     // ====== Friend Functions ====== //
     void addFriend(string f_name);
     void displayAllFriends();
     void clearFriendList();
+
+    // === Notifications === //
+    void sendNotifications(string, string);
+    void showNotifications();
 };

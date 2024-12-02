@@ -49,6 +49,7 @@ public:
     int getuserindex(string username);
     void showConnections();
     bool search(string username);
+    void showNotifiactions();
     int **updateConnections();
     void signout();
     void home(string username);

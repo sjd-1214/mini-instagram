@@ -149,9 +149,9 @@ void User::sendRequest(string sender, int senderIndex, int receiverIndex, int **
 {
     request_list.addRequest(sender, senderIndex, receiverIndex, Connection);
 }
-void User::showRequests(int **Connection)
+int *User::showRequests(int **Connection, int &is_accepted)
 {
-    request_list.showRequests(Connection);
+    return request_list.showRequests(Connection, is_accepted);
 }
 
 // === Friend Functions === //
@@ -166,4 +166,13 @@ void User::displayAllFriends()
 void User::clearFriendList()
 {
     friend_list.clearFriendList();
+}
+
+void User::sendNotifications(string type, string username)
+{
+    notification_list.addNotification(type, username);
+}
+void User::showNotifications()
+{
+    notification_list.showNotifications();
 }

@@ -1,8 +1,5 @@
 #include <string>
 using namespace std;
-
-const int MAX_RECEIVERS = 100; // Maximum number of receivers
-
 struct RequestNode
 {
     string friend_username;
@@ -10,13 +7,18 @@ struct RequestNode
     int receiverIndex;
     RequestNode *next;
 };
+struct AcceptedRequest
+{
+    int senderIndex;
+    bool isAccepted;
+};
 
 class RequestList
 {
 private:
     RequestNode *front;
     RequestNode *rear;
-    int receiverIndices[MAX_RECEIVERS];
+    int *receiverIndices;
     int receiverCount;
     void deleteRequest(RequestNode *prev, RequestNode *current);
 
@@ -25,6 +27,5 @@ public:
     ~RequestList();
     void displayAllRequests();
     void addRequest(const string &username, int senderIndex, int receiverIndex, int **Connection);
-    void processTopRequest(int **Connection);
-    void showRequests(int **Connection);
+    int *showRequests(int **Connection, int &acceptedCount);
 };
