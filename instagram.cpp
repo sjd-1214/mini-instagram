@@ -322,6 +322,7 @@ void Instagram::home(string username)
     cout << "4. Show Recent Post" << endl;
     cout << "5. Reset Password" << endl;
     cout << "6. Show Requests" << endl;
+    cout << "7. Show Friend List" << endl;
     cout << "Enter Choice:";
     cin >> choice;
     cin.ignore();
@@ -349,6 +350,18 @@ void Instagram::home(string username)
     else if (choice == 6)
     {
         activeuser->user->showRequests(connections);
+        cout << "Press 1 to go back to home" << endl;
+        int choice;
+        cin >> choice;
+        if (choice == 1)
+        {
+            home(activeuser->user->getusername());
+        }
+    }
+    else if (choice == 7)
+    {
+        buildFriendList();
+        showFriendList();
         cout << "Press 1 to go back to home" << endl;
         int choice;
         cin >> choice;
@@ -446,4 +459,35 @@ void Instagram::showConnections()
         }
         cout << endl;
     }
+}
+
+void Instagram::buildFriendList()
+{
+    if (connections == nullptr)
+    {
+        cout << "Error: Connection matrix not initialized" << endl;
+        return;
+    }
+
+    int activeUserIndex = getuserindex(activeuser->user->getusername());
+
+    activeuser->user->clearFriendList();
+    for (int j = 0; j < user_count; j++)
+    {
+        if (connections[activeUserIndex][j] == 1)
+        {
+            activeuser->user->addFriend(user[j].getusername());
+        }
+    }
+}
+void Instagram::showFriendList()
+{
+    if (activeuser == nullptr)
+    {
+        cout << "Error: No active user" << endl;
+        return;
+    }
+
+    cout << "Friend List for " << activeuser->user->getusername() << ":" << endl;
+    activeuser->user->displayAllFriends();
 }

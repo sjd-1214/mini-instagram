@@ -1,5 +1,4 @@
 #include "user.h"
-
 User::User()
 {
     username = "";
@@ -13,6 +12,8 @@ User::User()
     security_questions[1] = "What is your favourite color?";
     security_questions[2] = "What is your favourite food?";
     post_stack = PostStack();
+    request_list = RequestList();
+    friend_list = FriendList();
 }
 
 User::User(string username, string email, string password, string first_name, string last_name, string DOB, char gender)
@@ -151,4 +152,18 @@ void User::sendRequest(string sender, int senderIndex, int receiverIndex, int **
 void User::showRequests(int **Connection)
 {
     request_list.showRequests(Connection);
+}
+
+// === Friend Functions === //
+void User::addFriend(string f_name)
+{
+    friend_list.addFriend(f_name);
+}
+void User::displayAllFriends()
+{
+    friend_list.displayAllFriends();
+}
+void User::clearFriendList()
+{
+    friend_list.clearFriendList();
 }

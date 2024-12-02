@@ -4,6 +4,7 @@
 #include <ctime>
 #include "post.h"
 #include "requestList.h"
+#include "friendList.h"
 using namespace std;
 
 class User
@@ -19,6 +20,7 @@ private:
     string DOB;
     PostStack post_stack;
     RequestList request_list;
+    FriendList friend_list;
     string security_answers[3];
     string security_questions[3];
 
@@ -35,10 +37,6 @@ public:
     void setlast_sign_in(string);
     void setgender(char);
     void setDOB(string);
-    void newPost();
-    void getLatestPost();
-    void sendRequest(string sender, int senderIndex, int receiverIndex, int **Connection);
-    void showRequests(int **Connection);
 
     ////// Getters ///////
     string getfirst_name();
@@ -53,4 +51,17 @@ public:
     /////////// Functions /////////////////
     bool verifySecurityAnswers();
     void setSecurityAnswers();
+
+    // ====== Post Functions ====== //
+    void newPost();
+    void getLatestPost();
+
+    // === Request Functions === //
+    void sendRequest(string sender, int senderIndex, int receiverIndex, int **Connection);
+    void showRequests(int **Connection);
+
+    // ====== Friend Functions ====== //
+    void addFriend(string f_name);
+    void displayAllFriends();
+    void clearFriendList();
 };

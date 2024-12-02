@@ -1,21 +1,23 @@
-#pragma once
 #include <iostream>
 #include <string>
 using namespace std;
-
-struct FriendNode
+class FriendNode
 {
+public:
     string friend_username;
-    FriendNode(string);
-
+    FriendNode *next;
+    FriendNode(string f_name) : friend_username(f_name), next(nullptr) {}
 };
-
 class FriendList
 {
 private:
-    FriendNode* top;
+    FriendNode *top;
+
 public:
     FriendList();
-    FriendNode* getTop()const;
-    void addFriend();
+    FriendNode *getTop() const;
+    void addFriend(string f_name);
+    void displayAllFriends();
+    void clearFriendList();
+    ~FriendList();
 };
