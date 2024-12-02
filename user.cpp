@@ -14,6 +14,8 @@ User::User()
     post_stack = PostStack();
     request_list = RequestList();
     friend_list = FriendList();
+    notification_list = NotificationList();
+    news_feed = NewsFeed();
 }
 
 User::User(string username, string email, string password, string first_name, string last_name, string DOB, char gender)
@@ -144,6 +146,18 @@ void User::getLatestPost()
 {
     post_stack.peek();
 }
+string User::getPostText()
+{
+    return post_stack.getPost();
+}
+string User::getPostDate()
+{
+    return post_stack.getDate();
+}
+string User::getPostUsername()
+{
+    return username;
+}
 
 void User::sendRequest(string sender, int senderIndex, int receiverIndex, int **Connection)
 {
@@ -175,4 +189,19 @@ void User::sendNotifications(string type, string username)
 void User::showNotifications()
 {
     notification_list.showNotifications();
+}
+
+// == news feed functions == //
+void User ::showNewsFeed()
+{
+    news_feed.displayAllPosts();
+}
+void User::setNewsFeed(string post, string date, string username)
+{
+    news_feed.addPost(post, date, username);
+}
+
+void User::clearNewsFeed()
+{
+    news_feed.clearNewsFeed();
 }

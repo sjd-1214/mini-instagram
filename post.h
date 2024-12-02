@@ -34,6 +34,9 @@ public:
 
     void newPost(string, string, string);
     void peek() const;
+    string getPost() const;
+    string getDate() const;
+    string getUsername() const;
 
     /////////////// Destructor //////////////////
     ~PostStack();

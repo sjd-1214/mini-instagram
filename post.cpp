@@ -66,6 +66,34 @@ void PostStack::peek() const
     cout << "Date: " << top->getDate() << endl;
 }
 
+string PostStack::getPost() const
+{
+    if (top == nullptr)
+    {
+        return "No posts available.";
+    }
+
+    return top->getPost();
+}
+string PostStack::getDate() const
+{
+    if (top == nullptr)
+    {
+        return "No posts available.";
+    }
+
+    return top->getDate();
+}
+string PostStack::getUsername() const
+{
+    if (top == nullptr)
+    {
+        return "No posts available.";
+    }
+
+    return top->getUsername();
+}
+
 /////////////// Destructor implementation ////////////////////////
 PostStack::~PostStack()
 {

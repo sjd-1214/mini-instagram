@@ -312,6 +312,50 @@ void Instagram::signout()
     cout << "You have been signed out" << endl;
     showMenu();
 }
+// === build news feed === //
+void Instagram::buildNewsFeed()
+{
+    if (activeuser == nullptr)
+    {
+        cout << "Error: No active user" << endl;
+        return;
+    }
+    activeuser->user->clearNewsFeed();
+    int active_user_index = getuserindex(activeuser->user->getusername());
+    if (active_user_index == -1)
+    {
+        cout << "Error: Active user not found in the system" << endl;
+        return;
+    }
+
+    int *direct_friends = new int[user_count]();
+    int direct_friend_count = 0;
+
+    for (int i = 0; i < user_count; i++)
+    {
+        if (connections[active_user_index][i] == 1)
+        {
+            direct_friends[direct_friend_count++] = i;
+        }
+    }
+
+    cout << "News Feed for " << activeuser->user->getusername() << ":" << endl;
+    for (int i = 0; i < direct_friend_count; i++)
+    {
+        BSTNode *friend_node = findUserNodeByIndex(bst->getRoot(), direct_friends[i], i);
+        if (friend_node != nullptr && friend_node->user != nullptr)
+        {
+            activeuser->user->setNewsFeed(friend_node->user->getPostText(), friend_node->user->getPostDate(), friend_node->user->getusername());
+        }
+    }
+
+    delete[] direct_friends;
+}
+void Instagram::showNewsFeed()
+{
+    activeuser->user->showNewsFeed();
+}
+
 ///================================ Home ================================= ///
 void Instagram::home(string username)
 {
@@ -328,6 +372,7 @@ void Instagram::home(string username)
     cout << "7. Show Friend List" << endl;
     cout << "8. Show Suggestions" << endl;
     cout << "9. Show Notifications" << endl;
+    cout << "10. Show News Feed" << endl;
     cout << "Enter Choice:";
     cin >> choice;
     cin.ignore();
@@ -404,6 +449,12 @@ void Instagram::home(string username)
         showNotifiactions();
         home(activeuser->user->getusername());
     }
+    else if (choice == 10)
+    {
+        buildNewsFeed();
+        showNewsFeed();
+        home(activeuser->user->getusername());
+    }
     else
     {
         cout << "Invalid choice" << endl;
@@ -458,12 +509,14 @@ void Instagram::addfriend(string username)
     if (senderIndex >= user_count || receiverIndex >= user_count)
     {
         cout << "Error: Invalid user indices" << endl;
+        home(activeuser->user->getusername());
         return;
     }
 
     if (connections[senderIndex][receiverIndex] == 1 || connections[receiverIndex][senderIndex] == 1)
     {
         cout << "Connection already exists!" << endl;
+        home(activeuser->user->getusername());
         return;
     }
 
@@ -472,9 +525,9 @@ void Instagram::addfriend(string username)
     userNode->user->sendNotifications("request", activeuser->user->getusername());
     activeuser->user->addFriend(username);
 
-    // cout << "Debug - Initial connection status:" << endl;
-    // cout << "connections[" << senderIndex << "][" << receiverIndex << "] = "
-    //      << connections[senderIndex][receiverIndex] << endl;
+    cout << "Debug - Initial connection status:" << endl;
+    cout << "connections[" << senderIndex << "][" << receiverIndex << "] = "
+         << connections[senderIndex][receiverIndex] << endl;
 
     home(activeuser->user->getusername());
 }
@@ -671,43 +724,4 @@ BSTNode *Instagram::findUserNodeByIndex(BSTNode *root, int target_index, int &cu
 void Instagram::showNotifiactions()
 {
     activeuser->user->showNotifications();
-}
-// === build news feed === //
-void Instagram::buildNewsFeed()
-{
-    if (activeuser == nullptr)
-    {
-        cout << "Error: No active user" << endl;
-        return;
-    }
-
-    int active_user_index = getuserindex(activeuser->user->getusername());
-    if (active_user_index == -1)
-    {
-        cout << "Error: Active user not found in the system" << endl;
-        return;
-    }
-
-    int *direct_friends = new int[user_count]();
-    int direct_friend_count = 0;
-
-    for (int i = 0; i < user_count; i++)
-    {
-        if (connections[active_user_index][i] == 1)
-        {
-            direct_friends[direct_friend_count++] = i;
-        }
-    }
-
-    cout << "News Feed for " << activeuser->user->getusername() << ":" << endl;
-    for (int i = 0; i < direct_friend_count; i++)
-    {
-        BSTNode *friend_node = findUserNodeByIndex(bst->getRoot(), direct_friends[i], i);
-        if (friend_node != nullptr && friend_node->user != nullptr)
-        {
-            friend_node->user->getLatestPost();
-        }
-    }
-
-    delete[] direct_friends;
 }

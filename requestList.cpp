@@ -120,7 +120,7 @@ int *RequestList::showRequests(int **Connection, int &acceptedCount)
     case 2:
     {
         cout << "Enter request indices to process (0 to finish):\n";
-        int *indices = new int[requestCount]; // Dynamically allocated array
+        int *indices = new int[requestCount];
         int idx, indexCount = 0;
 
         while (true)
@@ -171,7 +171,7 @@ int *RequestList::showRequests(int **Connection, int &acceptedCount)
             }
         }
 
-        delete[] indices; // Free dynamically allocated memory
+        delete[] indices;
         break;
     }
 

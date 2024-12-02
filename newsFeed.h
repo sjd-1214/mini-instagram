@@ -4,8 +4,10 @@ class NewsFeedNode
 {
 public:
     string post;
+    string date;
+    string username;
     NewsFeedNode *next;
-    NewsFeedNode(string post) : post(post), next(nullptr) {}
+    NewsFeedNode(string post, string date, string username) : post(post), date(date), username(username), next(nullptr) {}
 };
 class NewsFeed
 {
@@ -14,7 +16,7 @@ private:
 
 public:
     NewsFeed();
-    void addPost(string post);
+    void addPost(string post, string date, string username);
     void displayAllPosts();
-    ~NewsFeed();
+    void clearNewsFeed();
 };
