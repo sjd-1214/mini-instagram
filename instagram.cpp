@@ -713,3 +713,42 @@ void Instagram::showNotifiactions()
 {
     activeuser->user->showNotifications();
 }
+// === build news feed === //
+void Instagram::buildNewsFeed()
+{
+    if (activeuser == nullptr)
+    {
+        cout << "Error: No active user" << endl;
+        return;
+    }
+
+    int active_user_index = getuserindex(activeuser->user->getusername());
+    if (active_user_index == -1)
+    {
+        cout << "Error: Active user not found in the system" << endl;
+        return;
+    }
+
+    int *direct_friends = new int[user_count]();
+    int direct_friend_count = 0;
+
+    for (int i = 0; i < user_count; i++)
+    {
+        if (connections[active_user_index][i] == 1)
+        {
+            direct_friends[direct_friend_count++] = i;
+        }
+    }
+
+    cout << "News Feed for " << activeuser->user->getusername() << ":" << endl;
+    for (int i = 0; i < direct_friend_count; i++)
+    {
+        BSTNode *friend_node = findUserNodeByIndex(bst->getRoot(), direct_friends[i], i);
+        if (friend_node != nullptr && friend_node->user != nullptr)
+        {
+            friend_node->user->getLatestPost();
+        }
+    }
+
+    delete[] direct_friends;
+}
