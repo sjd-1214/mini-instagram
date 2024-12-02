@@ -55,4 +55,5 @@ public:
     void showSuggestion();
     BSTNode *findUserNodeByIndex(BSTNode *root, int target_index, int &current_index);
     string getUsernameByIndex(int index);
+    void buildNewsFeed();
 };
