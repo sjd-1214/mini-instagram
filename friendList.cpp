@@ -21,8 +21,7 @@ void FriendList::addFriend(string f_name)
     FriendNode *newNode = new FriendNode(f_name);
     newNode->next = top;
     top = newNode;
-
-    cout << "Friend '" << f_name << "' added successfully!" << endl;
+    cout<<endl;
 }
 
 /// @brief Display all friends in the list

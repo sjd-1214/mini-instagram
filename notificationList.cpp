@@ -17,7 +17,6 @@ void NotificationList::addNotification(string type, string username)
         NotificationNode *newNode = new NotificationNode(type, username, message);
         newNode->next = top;
         top = newNode;
-        cout << "Notification added successfully!" << endl;
     }
     else if (type == "accepted")
     {
@@ -25,7 +24,6 @@ void NotificationList::addNotification(string type, string username)
         NotificationNode *newNode = new NotificationNode(type, username, message);
         newNode->next = top;
         top = newNode;
-        cout << "Notification added successfully!" << endl;
     }
     else
     {
