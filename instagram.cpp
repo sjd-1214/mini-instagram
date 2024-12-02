@@ -6,23 +6,31 @@
 using namespace std;
 
 // Helper Functions for Validation
-bool isValidString(const string &input) {
-    for (char c : input) {
-        if (!isalpha(c) && c != ' ') return false; // Only letters and spaces allowed
+bool isValidString(const string &input)
+{
+    for (char c : input)
+    {
+        if (!isalpha(c) && c != ' ')
+            return false; // Only letters and spaces allowed
     }
     return true;
 }
 
-bool isValidInteger(const string &input) {
-    if (input.empty()) return false;
-    for (char c : input) {
-        if (!isdigit(c)) return false; // Only digits allowed
+bool isValidInteger(const string &input)
+{
+    if (input.empty())
+        return false;
+    for (char c : input)
+    {
+        if (!isdigit(c))
+            return false; // Only digits allowed
     }
     return true;
 }
 
 // Constructor
-Instagram::Instagram() {
+Instagram::Instagram()
+{
     user_count = 0;
     bst = new BST();
     connections = nullptr;
@@ -31,27 +39,34 @@ Instagram::Instagram() {
 }
 
 // Update Connections
-int **Instagram::updateConnections() {
+int **Instagram::updateConnections()
+{
     if (user_count <= 0)
         return nullptr;
 
     int **temp_connections = new int *[user_count];
-    for (int i = 0; i < user_count; i++) {
+    for (int i = 0; i < user_count; i++)
+    {
         temp_connections[i] = new int[user_count];
-        for (int j = 0; j < user_count; j++) {
+        for (int j = 0; j < user_count; j++)
+        {
             temp_connections[i][j] = 0;
         }
     }
 
-    if (connections != nullptr) {
+    if (connections != nullptr)
+    {
         int oldSize = user_count - 1;
-        for (int i = 0; i < oldSize; i++) {
-            for (int j = 0; j < oldSize; j++) {
+        for (int i = 0; i < oldSize; i++)
+        {
+            for (int j = 0; j < oldSize; j++)
+            {
                 temp_connections[i][j] = connections[i][j];
             }
         }
 
-        for (int i = 0; i < oldSize; i++) {
+        for (int i = 0; i < oldSize; i++)
+        {
             delete[] connections[i];
         }
         delete[] connections;
@@ -61,7 +76,8 @@ int **Instagram::updateConnections() {
 }
 
 // Show Menu
-void Instagram::showMenu() {
+void Instagram::showMenu()
+{
     string choiceStr;
     int choice;
 
@@ -74,31 +90,34 @@ void Instagram::showMenu() {
 
     getline(cin, choiceStr);
 
-    while (!isValidInteger(choiceStr) || stoi(choiceStr) < 1 || stoi(choiceStr) > 4) {
+    while (!isValidInteger(choiceStr) || stoi(choiceStr) < 1 || stoi(choiceStr) > 4)
+    {
         cout << "Invalid input! Please enter a valid option (1-4): ";
         getline(cin, choiceStr);
     }
     choice = stoi(choiceStr);
 
-    switch (choice) {
-        case 1:
-            createAccount();
-            break;
-        case 2:
-            logIn();
-            break;
-        case 3:
-            // showConnections();
-            showMenu();
-            break;
-        case 4:
-            cout << "Goodbye!" << endl;
-            break;
+    switch (choice)
+    {
+    case 1:
+        createAccount();
+        break;
+    case 2:
+        logIn();
+        break;
+    case 3:
+        // showConnections();
+        showMenu();
+        break;
+    case 4:
+        cout << "Goodbye!" << endl;
+        break;
     }
 }
 
 // Create Account
-void Instagram::createAccount() {
+void Instagram::createAccount()
+{
     cout << "\n===== Create New Account =====\n";
     string username, email, password, first_name, last_name, DOB, choiceStr;
     char gender;
@@ -106,7 +125,8 @@ void Instagram::createAccount() {
     // Username
     cout << "Enter username: ";
     getline(cin, username);
-    while (!isValidString(username) || search(username)) {
+    while (!isValidString(username) || search(username))
+    {
         cout << "Invalid or already registered username! Please try again: ";
         getline(cin, username);
     }
@@ -114,7 +134,8 @@ void Instagram::createAccount() {
     // Email
     cout << "Enter email: ";
     getline(cin, email);
-    while (!validate_email(email)) {
+    while (!validate_email(email))
+    {
         cout << "Invalid email! Please try again: ";
         getline(cin, email);
     }
@@ -122,7 +143,8 @@ void Instagram::createAccount() {
     // Password
     cout << "Enter password: ";
     getline(cin, password);
-    while (!validate_strong_password(password)) {
+    while (!validate_strong_password(password))
+    {
         cout << "Invalid password! Please try again: ";
         getline(cin, password);
     }
@@ -130,7 +152,8 @@ void Instagram::createAccount() {
     // First Name
     cout << "Enter first name: ";
     getline(cin, first_name);
-    while (!isValidString(first_name)) {
+    while (!isValidString(first_name))
+    {
         cout << "Invalid input! Name can only contain letters and spaces. Try again: ";
         getline(cin, first_name);
     }
@@ -138,7 +161,8 @@ void Instagram::createAccount() {
     // Last Name
     cout << "Enter last name: ";
     getline(cin, last_name);
-    while (!isValidString(last_name)) {
+    while (!isValidString(last_name))
+    {
         cout << "Invalid input! Name can only contain letters and spaces. Try again: ";
         getline(cin, last_name);
     }
@@ -146,7 +170,8 @@ void Instagram::createAccount() {
     // Date of Birth
     cout << "Enter DOB (DD-MM-YYYY): ";
     getline(cin, DOB);
-    while (!validate_DOB(DOB)) {
+    while (!validate_DOB(DOB))
+    {
         cout << "Invalid DOB format! Please try again: ";
         getline(cin, DOB);
     }
@@ -154,7 +179,8 @@ void Instagram::createAccount() {
     // Gender
     cout << "1. Male\n2. Female\nChoose your gender: ";
     getline(cin, choiceStr);
-    while (!isValidInteger(choiceStr) || (stoi(choiceStr) != 1 && stoi(choiceStr) != 2)) {
+    while (!isValidInteger(choiceStr) || (stoi(choiceStr) != 1 && stoi(choiceStr) != 2))
+    {
         cout << "Invalid choice! Please enter 1 for Male or 2 for Female: ";
         getline(cin, choiceStr);
     }
@@ -168,7 +194,8 @@ void Instagram::createAccount() {
     user_count++;
 
     int **new_connections = updateConnections();
-    if (new_connections != nullptr) {
+    if (new_connections != nullptr)
+    {
         connections = new_connections;
     }
     cout << "\nWelcome to Instagram, " << username << "!\n";
@@ -177,14 +204,15 @@ void Instagram::createAccount() {
 }
 
 // Search
-bool Instagram::search(string username) {
+bool Instagram::search(string username)
+{
     BSTNode *userNode = bst->search(username);
     return userNode != nullptr;
 }
 
-
 ///======= Log In ======= ///
-void Instagram::logIn() {
+void Instagram::logIn()
+{
     string username, password, choiceStr;
     bool is_valid = false;
 
@@ -192,6 +220,11 @@ void Instagram::logIn() {
     cout << "\n===== Log In =====\n";
     cout << "Enter username: ";
     getline(cin, username);
+    while (!isValidString(username) || !search(username))
+    {
+        cout << "Invalid or user doesn't exists! Please try again: ";
+        getline(cin, username);
+    }
 
     // Prompt for password
     cout << "Enter password: ";
@@ -200,7 +233,8 @@ void Instagram::logIn() {
     BSTNode *userNode = bst->search(username);
 
     // Validate login credentials
-    if (userNode != nullptr && userNode->user->getpassword() == password) {
+    if (userNode != nullptr && userNode->user->getpassword() == password)
+    {
         activeuser = userNode;
         time_t now = time(0);
         userNode->user->setlast_sign_in(ctime(&now));
@@ -208,25 +242,31 @@ void Instagram::logIn() {
     }
 
     // Login success or failure
-    if (is_valid) {
+    if (is_valid)
+    {
         cout << "Login successful!!\n";
         setActiveUser(bst->search(username));
         home(username);
-    } else {
+    }
+    else
+    {
         cout << "Invalid username or password. Please try again.\n";
         showMenu();
     }
 }
 
 /// ======= Reset Password ======= ///
-void Instagram::resetpassword() {
-    if (activeuser->user->verifySecurityAnswers()) {
+void Instagram::resetpassword()
+{
+    if (activeuser->user->verifySecurityAnswers())
+    {
         string password;
         cout << "\nEnter new password: ";
         getline(cin, password);
 
         // Validate the new password
-        while (!validate_strong_password(password) || password == activeuser->user->getpassword()) {
+        while (!validate_strong_password(password) || password == activeuser->user->getpassword())
+        {
             cout << "Password must be strong and different from the previous one. Try again: ";
             getline(cin, password);
         }
@@ -242,29 +282,38 @@ void Instagram::resetpassword() {
         getline(cin, choiceStr);
 
         // Validate choice
-        while (!isValidInteger(choiceStr) || stoi(choiceStr) != 1) {
+        while (!isValidInteger(choiceStr) || stoi(choiceStr) != 1)
+        {
             cout << "Invalid input. Please enter '1' to return to home: ";
             getline(cin, choiceStr);
         }
 
         home(activeuser->user->getusername());
-    } else {
+    }
+    else
+    {
         cout << "Invalid security answers. Please try again.\n";
     }
 }
 
 ///======= Search Profile ======= ///
-void Instagram::searchProfile() {
+void Instagram::searchProfile()
+{
     string username;
     cout << "\n===== Search Profile =====\n";
     cout << "Enter username: ";
     getline(cin, username);
-
+    while (!isValidString(username) || search(username))
+    {
+        cout << "Invalid or user doesn't exists! Please try again: ";
+        getline(cin, username);
+    }
     int choice;
     BSTNode *userNode = bst->search(username);
 
     // Check if user exists
-    if (userNode != nullptr) {
+    if (userNode != nullptr)
+    {
         // Display profile information
         cout << "+----------------------- User Profile -----------------------+\n";
         cout << "First Name: " << userNode->user->getfirst_name() << endl;
@@ -278,31 +327,39 @@ void Instagram::searchProfile() {
         getline(cin, choiceStr);
 
         // Validate choice input
-        while (!isValidInteger(choiceStr) || (stoi(choiceStr) != 1 && stoi(choiceStr) != 2)) {
+        while (!isValidInteger(choiceStr) || (stoi(choiceStr) != 1 && stoi(choiceStr) != 2))
+        {
             cout << "Invalid choice! Please enter 1 to add friend or 2 to go back: ";
             getline(cin, choiceStr);
         }
 
         choice = stoi(choiceStr);
 
-        if (choice == 1) {
+        if (choice == 1)
+        {
             addfriend(userNode->user->getusername());
-        } else {
+        }
+        else
+        {
             home(activeuser->user->getusername());
         }
-    } else {
+    }
+    else
+    {
         cout << "User not found!\n";
         home(activeuser->user->getusername());
     }
 }
 
 /// === Set Active User === ///
-void Instagram::setActiveUser(BSTNode *activeuser) {
+void Instagram::setActiveUser(BSTNode *activeuser)
+{
     this->activeuser = activeuser;
 }
 
 ///======================== Sign Out ========================///
-void Instagram::signout() {
+void Instagram::signout()
+{
     cout << "You have been signed out.\n";
     showMenu();
 }
@@ -310,6 +367,7 @@ void Instagram::signout() {
 ///================================ Home ================================= ///
 void Instagram::home(string username)
 {
+    string choiceStr;
     int choice;
     string post;
     string date;
@@ -324,7 +382,14 @@ void Instagram::home(string username)
     cout << "8. Show Suggestions" << endl;
     cout << "9. Show Notifications" << endl;
     cout << "Enter Choice:";
-    cin >> choice;
+    getline(cin, choiceStr);
+
+    while (!isValidInteger(choiceStr) || stoi(choiceStr) < 1 || stoi(choiceStr) > 4)
+    {
+        cout << "Invalid input! Please enter a valid option (1-4): ";
+        getline(cin, choiceStr);
+    }
+    choice = stoi(choiceStr);
     cin.ignore();
     if (choice == 1)
     {
@@ -585,8 +650,16 @@ void Instagram::showSuggestion()
         }
 
         cout << "\nEnter the number of the user to send a friend request (0 to go back): ";
+        string choiceStr;
         int choice;
-        cin >> choice;
+        getline(cin, choiceStr);
+
+        while (!isValidInteger(choiceStr) || stoi(choiceStr) < 1 || stoi(choiceStr) > 4)
+        {
+            cout << "Invalid input! Please enter a valid option (1-4): ";
+            getline(cin, choiceStr);
+        }
+        choice = stoi(choiceStr);
         cin.ignore();
 
         if (choice > 0 && choice <= suggestion_count)
