@@ -163,3 +163,21 @@ void User::sendNotifications(string type, string username) {
 void User::showNotifications() {
     notification_list.showNotifications();
 }
+
+void User::sendMessage(){
+    string choiceStr;
+    int choice;
+    cout<<"Whom do you want to send message: "<<endl;
+    int number = friend_list.displayAllFriends();
+    getline(cin, choiceStr);
+
+    while (!isValidInteger(choiceStr) || (stoi(choiceStr)<0|| stoi(choiceStr)>number) ) {
+        cout << "Invalid input! Please enter a valid option: ";
+        getline(cin, choiceStr);
+    }
+    choice = stoi(choiceStr);
+
+    
+
+
+}
