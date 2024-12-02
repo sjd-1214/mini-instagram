@@ -46,7 +46,7 @@ public:
     void addfriend(string username);
     void showFriendList();
     int getuserindex(string username);
-    void showConnections();
+    // void showConnections();
     bool search(string username);
     void showNotifiactions();
     int **updateConnections();

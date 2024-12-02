@@ -78,7 +78,7 @@ void Instagram::showMenu()
         logIn();
         break;
     case 3:
-        showConnections();
+        // showConnections();
         showMenu();
         break;
     case 4:
@@ -421,11 +421,6 @@ int Instagram::getuserindex(string username)
 //// ========= add friend ======== ///////////
 void Instagram::addfriend(string username)
 {
-    if (activeuser == nullptr)
-    {
-        cout << "No active user session!" << endl;
-        return;
-    }
 
     BSTNode *userNode = bst->search(username);
     if (userNode == nullptr)
@@ -440,31 +435,13 @@ void Instagram::addfriend(string username)
         return;
     }
 
-    if (connections == nullptr)
-    {
-        cout << "Error: Connection matrix not initialized" << endl;
-        return;
-    }
-
     int senderIndex = getuserindex(activeuser->user->getusername());
     int receiverIndex = getuserindex(username);
-
-    if (senderIndex == -1 || receiverIndex == -1)
-    {
-        cout << "Error: Could not determine user indices" << endl;
-        return;
-    }
-
-    if (senderIndex >= user_count || receiverIndex >= user_count)
-    {
-        cout << "Error: Invalid user indices" << endl;
-        return;
-    }
 
     if (connections[senderIndex][receiverIndex] == 1 || connections[receiverIndex][senderIndex] == 1)
     {
         cout << "Connection already exists!" << endl;
-        return;
+        home(activeuser->user->getusername());
     }
 
     userNode->user->sendRequest(activeuser->user->getusername(),
@@ -472,30 +449,26 @@ void Instagram::addfriend(string username)
     userNode->user->sendNotifications("request", activeuser->user->getusername());
     activeuser->user->addFriend(username);
 
-    // cout << "Debug - Initial connection status:" << endl;
-    // cout << "connections[" << senderIndex << "][" << receiverIndex << "] = "
-    //      << connections[senderIndex][receiverIndex] << endl;
-
     home(activeuser->user->getusername());
 }
 
-void Instagram::showConnections()
-{
-    if (connections == nullptr)
-    {
-        cout << "Error: Connection matrix not initialized" << endl;
-        return;
-    }
+// void Instagram::showConnections()
+// {
+//     if (connections == nullptr)
+//     {
+//         cout << "Error: Connection matrix not initialized" << endl;
+//         return;
+//     }
 
-    for (int i = 0; i < user_count; i++)
-    {
-        for (int j = 0; j < user_count; j++)
-        {
-            cout << connections[i][j] << " ";
-        }
-        cout << endl;
-    }
-}
+//     for (int i = 0; i < user_count; i++)
+//     {
+//         for (int j = 0; j < user_count; j++)
+//         {
+//             cout << connections[i][j] << " ";
+//         }
+//         cout << endl;
+//     }
+// }
 
 void Instagram::showFriendList()
 {
@@ -513,7 +486,7 @@ void Instagram::showSuggestion()
 {
     if (connections == nullptr || activeuser == nullptr)
     {
-        cout << "Error: No active user or connection matrix not initialized" << endl;
+        cout << "No Suggestions" << endl;
         return;
     }
 
