@@ -17,7 +17,7 @@ public:
     FriendList();
     FriendNode *getTop() const;
     void addFriend(string f_name);
-    void displayAllFriends();
+    int displayAllFriends();
     void clearFriendList();
     ~FriendList();
 };

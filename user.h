@@ -6,6 +6,7 @@
 #include "requestList.h"
 #include "notificationList.h"
 #include "friendList.h"
+#include "messages.h"
 using namespace std;
 
 class User
@@ -25,6 +26,7 @@ private:
     NotificationList notification_list;
     string security_answers[3];
     string security_questions[3];
+    MessageStack messages;
 
 public:
     User();
@@ -70,4 +72,8 @@ public:
     // === Notifications === //
     void sendNotifications(string, string);
     void showNotifications();
+
+    // === Messages === //
+    void sendMessage();
+    
 };

@@ -25,7 +25,7 @@ void FriendList::addFriend(string f_name)
 }
 
 /// @brief Display all friends in the list
-void FriendList::displayAllFriends()
+int FriendList::displayAllFriends()
 {
     if (top == nullptr)
     {
@@ -42,6 +42,7 @@ void FriendList::displayAllFriends()
         current = current->next;
     }
     cout << endl;
+    return count-1;
 }
 
 /// @brief Clear the entire friend list
