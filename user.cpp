@@ -176,8 +176,4 @@ void User::sendMessage(){
         getline(cin, choiceStr);
     }
     choice = stoi(choiceStr);
-
-    
-
-
 }
