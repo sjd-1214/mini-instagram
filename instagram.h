@@ -1,10 +1,10 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <iomanip>
 #include "validations.h"
 #include "user.h"
 #include "bst.h"
-
 using namespace std;
 
 class Instagram
@@ -52,4 +52,7 @@ public:
     int **updateConnections();
     void signout();
     void home(string username);
+    void showSuggestion();
+    BSTNode *findUserNodeByIndex(BSTNode *root, int target_index, int &current_index);
+    string getUsernameByIndex(int index);
 };

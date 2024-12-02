@@ -72,6 +72,7 @@ void Instagram::showMenu()
     {
     case 1:
         createAccount();
+
         break;
     case 2:
         logIn();
@@ -222,6 +223,7 @@ void Instagram::logIn()
     else
     {
         cout << "Invalid username or password" << endl;
+        showMenu();
     }
 }
 ///////////////////////////////////////////////////////
@@ -292,6 +294,7 @@ void Instagram::searchProfile()
     else
     {
         cout << "User Not Found!!" << endl;
+        home(activeuser->user->getusername());
     }
 }
 /// === Set Active User === ///
@@ -323,6 +326,7 @@ void Instagram::home(string username)
     cout << "5. Reset Password" << endl;
     cout << "6. Show Requests" << endl;
     cout << "7. Show Friend List" << endl;
+    cout << "8. Show Suggestions" << endl;
     cout << "Enter Choice:";
     cin >> choice;
     cin.ignore();
@@ -362,6 +366,17 @@ void Instagram::home(string username)
     {
         buildFriendList();
         showFriendList();
+        cout << "Press 1 to go back to home" << endl;
+        int choice;
+        cin >> choice;
+        if (choice == 1)
+        {
+            home(activeuser->user->getusername());
+        }
+    }
+    else if (choice == 8)
+    {
+        showSuggestion();
         cout << "Press 1 to go back to home" << endl;
         int choice;
         cin >> choice;
@@ -490,4 +505,164 @@ void Instagram::showFriendList()
 
     cout << "Friend List for " << activeuser->user->getusername() << ":" << endl;
     activeuser->user->displayAllFriends();
+}
+
+void Instagram::showSuggestion()
+{
+    if (connections == nullptr || activeuser == nullptr)
+    {
+        cout << "Error: No active user or connection matrix not initialized" << endl;
+        return;
+    }
+
+    int active_user_index = getuserindex(activeuser->user->getusername());
+    if (active_user_index == -1)
+    {
+        cout << "Error: Active user not found in the system" << endl;
+        return;
+    }
+
+    int *direct_friends = new int[user_count]();
+    int *suggestions = new int[user_count]();
+    double *suggestion_scores = new double[user_count]();
+    bool *visited = new bool[user_count]();
+    int direct_friend_count = 0;
+    int suggestion_count = 0;
+
+    for (int i = 0; i < user_count; i++)
+    {
+        if (connections[active_user_index][i] == 1)
+        {
+            direct_friends[direct_friend_count++] = i;
+            visited[i] = true;
+        }
+    }
+
+    visited[active_user_index] = true;
+
+    int *queue = new int[user_count]();
+    int front = 0, rear = 0;
+
+    for (int i = 0; i < direct_friend_count; i++)
+    {
+        queue[rear++] = direct_friends[i];
+    }
+
+    while (front < rear)
+    {
+        int current = queue[front++];
+
+        for (int i = 0; i < user_count; i++)
+        {
+            if (connections[current][i] == 1 && !visited[i])
+            {
+                visited[i] = true;
+                suggestions[suggestion_count++] = i;
+                double score = 0.0;
+
+                int mutual_friends = 0;
+                for (int j = 0; j < direct_friend_count; j++)
+                {
+                    if (connections[i][direct_friends[j]] == 1)
+                    {
+                        mutual_friends++;
+                    }
+                }
+                score += 0.5 * (mutual_friends / (double)direct_friend_count);
+
+                BSTNode *suggestion_user = bst->search(getUsernameByIndex(i));
+                if (suggestion_user != nullptr && suggestion_user->user != nullptr)
+                {
+                    score += 0.3;
+                }
+                score += 0.2 * (1.0 / (front + 1));
+
+                suggestion_scores[i] = score * 100;
+            }
+        }
+    }
+
+    for (int i = 0; i < suggestion_count - 1; i++)
+    {
+        for (int j = 0; j < suggestion_count - i - 1; j++)
+        {
+            if (suggestion_scores[suggestions[j]] < suggestion_scores[suggestions[j + 1]])
+            {
+                int temp_suggestion = suggestions[j];
+                suggestions[j] = suggestions[j + 1];
+                suggestions[j + 1] = temp_suggestion;
+            }
+        }
+    }
+
+    if (suggestion_count == 0)
+    {
+        cout << "No friend suggestions available!" << endl;
+    }
+    else
+    {
+        cout << "Friend Suggestions:" << endl;
+        for (int i = 0; i < suggestion_count; i++)
+        {
+            BSTNode *suggestion_user = bst->search(getUsernameByIndex(suggestions[i]));
+            if (suggestion_user != nullptr && suggestion_user->user != nullptr)
+            {
+                cout << i + 1 << ". "
+                     << suggestion_user->user->getusername()
+                     << " (Relevance Score: " << fixed << setprecision(2)
+                     << suggestion_scores[suggestions[i]] << "%)" << endl;
+            }
+        }
+
+        cout << "\nEnter the number of the user to send a friend request (0 to go back): ";
+        int choice;
+        cin >> choice;
+        cin.ignore();
+
+        if (choice > 0 && choice <= suggestion_count)
+        {
+            BSTNode *selected_user = bst->search(getUsernameByIndex(suggestions[choice - 1]));
+            if (selected_user != nullptr && selected_user->user != nullptr)
+            {
+                addfriend(selected_user->user->getusername());
+            }
+        }
+        else if (choice != 0)
+        {
+            cout << "Invalid choice. Returning to home menu." << endl;
+        }
+    }
+
+    delete[] direct_friends;
+    delete[] suggestions;
+    delete[] suggestion_scores;
+    delete[] visited;
+    delete[] queue;
+}
+
+string Instagram::getUsernameByIndex(int index)
+{
+    int current_index = 0;
+    BSTNode *node = findUserNodeByIndex(bst->getRoot(), index, current_index);
+    if (node != nullptr && node->user != nullptr)
+    {
+        return node->user->getusername();
+    }
+    return "";
+}
+
+BSTNode *Instagram::findUserNodeByIndex(BSTNode *root, int target_index, int &current_index)
+{
+    if (root == nullptr)
+        return nullptr;
+
+    BSTNode *left_result = findUserNodeByIndex(root->left, target_index, current_index);
+    if (left_result != nullptr)
+        return left_result;
+
+    if (current_index == target_index)
+        return root;
+    current_index++;
+
+    return findUserNodeByIndex(root->right, target_index, current_index);
 }

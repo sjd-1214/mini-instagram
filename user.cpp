@@ -123,7 +123,7 @@ void User::setSecurityAnswers()
     for (int i = 0; i < 3; i++)
     {
         cout << security_questions[i] << endl;
-        cin >> security_answers[i];
+        getline(cin, security_answers[i]);
     }
     cout << "Security Answers Set" << endl;
 }
