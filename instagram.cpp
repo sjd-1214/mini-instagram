@@ -430,7 +430,7 @@ void Instagram::home(string username)
     cout << "11. Reset Password" << endl;
     cout << "Enter Choice:";
     cin >> choice;
-    while (cin.fail() || choice < 1 || choice > 10)
+    while (cin.fail() || choice < 1 || choice > 11)
     {
         cin.clear();
         cin.ignore(1000, '\n');
