@@ -45,7 +45,7 @@ bool validate_strong_password(string password)
             has_special = true;
         }
     }
-    if (has_upper && has_lower && has_digit && has_special)
+    if (has_upper && has_lower && has_digit && has_special && strlength >= 8)
     {
         is_valid = true;
     }

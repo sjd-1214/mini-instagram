@@ -1,7 +1,4 @@
 #include "requestList.h"
-#include <iostream>
-using namespace std;
-
 RequestList::RequestList() : front(nullptr), rear(nullptr) {}
 
 RequestList::~RequestList()
@@ -17,7 +14,6 @@ RequestList::~RequestList()
 
 void RequestList::addRequest(const string &username, int senderIndex, int receiverIndex, int **Connection)
 {
-
     if (senderIndex < 0 || receiverIndex < 0 || !Connection)
     {
         cout << "Invalid parameters provided.\n";
@@ -28,6 +24,7 @@ void RequestList::addRequest(const string &username, int senderIndex, int receiv
         username,
         senderIndex,
         receiverIndex,
+        STATUS_PENDING,
         nullptr};
 
     if (rear == nullptr)
@@ -44,20 +41,45 @@ void RequestList::addRequest(const string &username, int senderIndex, int receiv
     cout << "Request added successfully.\n";
 }
 
+string getStatusString(int status)
+{
+    switch (status)
+    {
+    case STATUS_PENDING:
+        return "PENDING";
+    case STATUS_ACCEPTED:
+        return "ACCEPTED";
+    case STATUS_REJECTED:
+        return "REJECTED";
+    default:
+        return "UNKNOWN";
+    }
+}
+
 void RequestList::displayAllRequests()
 {
     if (front == nullptr)
     {
-        cout << "No pending requests.\n";
+        cout << "No requests.\n";
         return;
     }
 
-    cout << "\nPending Requests:\n";
+    cout << "\nAll Requests:\n";
     RequestNode *current = front;
     int count = 1;
+
     while (current != nullptr)
     {
-        cout << count++ << ". Request from: " << current->friend_username << endl;
+        string status;
+        if (current->status == STATUS_PENDING)
+            status = "PENDING";
+        else if (current->status == STATUS_ACCEPTED)
+            status = "ACCEPTED";
+        else if (current->status == STATUS_REJECTED)
+            status = "REJECTED";
+
+        cout << count << ". Request from: " << current->friend_username << " [" << status << "]\n";
+        count++;
         current = current->next;
     }
     cout << endl;
@@ -70,27 +92,41 @@ int *RequestList::showRequests(int **Connection, int &acceptedCount)
         acceptedCount = 0;
         return nullptr;
     }
-
     displayAllRequests();
-
     int requestCount = 0;
     RequestNode *temp = front;
     while (temp != nullptr)
     {
-        requestCount++;
+        if (temp->status == STATUS_PENDING)
+        {
+            requestCount++;
+        }
         temp = temp->next;
+    }
+
+    if (requestCount == 0)
+    {
+        cout << "No pending requests to process.\n";
+        return nullptr;
     }
 
     AcceptedRequest *acceptedRequests = new AcceptedRequest[requestCount];
     acceptedCount = 0;
 
     cout << "Choose processing method:\n";
-    cout << "1. Process all requests\n";
-    cout << "2. Process by index\n";
-    cout << "3. Process one by one\n";
+    cout << "1. Process all pending requests\n";
+    cout << "2. Process pending by index\n";
+    cout << "3. Process pending one by one\n";
 
     int method;
     cin >> method;
+    while (cin.fail() || method < 1 || method > 3)
+    {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        cout << "Invalid input!! Please try again: ";
+        cin >> method;
+    }
     cin.ignore();
 
     switch (method)
@@ -101,19 +137,33 @@ int *RequestList::showRequests(int **Connection, int &acceptedCount)
         int choice;
         cin >> choice;
 
-        while (front != nullptr)
+        while (cin.fail() || choice < 1 || choice > 2)
         {
-            if (choice == 1)
-            {
-                Connection[front->senderIndex][front->receiverIndex] = 1;
-                Connection[front->receiverIndex][front->senderIndex] = 1;
-                acceptedRequests[acceptedCount++].senderIndex = front->senderIndex;
-            }
-            RequestNode *toDelete = front;
-            front = front->next;
-            delete toDelete;
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input!! Please try again: ";
+            cin >> choice;
         }
-        rear = nullptr;
+
+        RequestNode *current = front;
+        while (current != nullptr)
+        {
+            if (current->status == STATUS_PENDING)
+            {
+                if (choice == 1)
+                {
+                    current->status = STATUS_ACCEPTED;
+                    Connection[current->senderIndex][current->receiverIndex] = 1;
+                    Connection[current->receiverIndex][current->senderIndex] = 1;
+                    acceptedRequests[acceptedCount++].senderIndex = current->senderIndex;
+                }
+                else
+                {
+                    current->status = STATUS_REJECTED;
+                }
+            }
+            current = current->next;
+        }
         break;
     }
 
@@ -137,37 +187,41 @@ int *RequestList::showRequests(int **Connection, int &acceptedCount)
         cout << "1. Accept selected\n2. Reject selected\nChoice: ";
         int choice;
         cin >> choice;
-
+        while (cin.fail() || choice < 1 || choice > 2)
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input!! Please try again: ";
+            cin >> choice;
+        }
         for (int i = 0; i < indexCount; i++)
         {
             RequestNode *current = front;
-            RequestNode *prev = nullptr;
             int currentIdx = 0;
+            int pendingIdx = -1;
 
-            while (current && currentIdx < indices[i])
+            while (current != nullptr)
             {
-                prev = current;
-                current = current->next;
-                currentIdx++;
-            }
-
-            if (current)
-            {
-                if (choice == 1)
+                if (current->status == STATUS_PENDING)
                 {
-                    Connection[current->senderIndex][current->receiverIndex] = 1;
-                    Connection[current->receiverIndex][current->senderIndex] = 1;
-                    acceptedRequests[acceptedCount++].senderIndex = current->senderIndex;
+                    pendingIdx++;
+                    if (pendingIdx == indices[i])
+                    {
+                        if (choice == 1)
+                        {
+                            current->status = STATUS_ACCEPTED;
+                            Connection[current->senderIndex][current->receiverIndex] = 1;
+                            Connection[current->receiverIndex][current->senderIndex] = 1;
+                            acceptedRequests[acceptedCount++].senderIndex = current->senderIndex;
+                        }
+                        else
+                        {
+                            current->status = STATUS_REJECTED;
+                        }
+                        break;
+                    }
                 }
-
-                if (prev)
-                    prev->next = current->next;
-                else
-                    front = current->next;
-
-                if (current == rear)
-                    rear = prev;
-                delete current;
+                current = current->next;
             }
         }
 
@@ -177,35 +231,45 @@ int *RequestList::showRequests(int **Connection, int &acceptedCount)
 
     case 3:
     {
-        while (front != nullptr)
+        RequestNode *current = front;
+        while (current != nullptr)
         {
-            bool currentRequestAccepted = false;
-            cout << "Processing request from: " << front->friend_username << endl;
-            cout << "1. Accept\n2. Reject\nChoice: ";
-            int choice;
-            cin >> choice;
-
-            if (choice == 1)
+            if (current->status == STATUS_PENDING)
             {
-                Connection[front->senderIndex][front->receiverIndex] = 1;
-                Connection[front->receiverIndex][front->senderIndex] = 1;
-                acceptedRequests[acceptedCount++].senderIndex = front->senderIndex;
-            }
+                cout << "Processing request from: " << current->friend_username << endl;
+                cout << "1. Accept\n2. Reject\nChoice: ";
+                int choice;
+                cin >> choice;
 
-            RequestNode *toDelete = front;
-            front = front->next;
-            if (front == nullptr)
-                rear = nullptr;
-            delete toDelete;
+                while (cin.fail() || choice < 1 || choice > 2)
+                {
+                    cin.clear();
+                    cin.ignore(1000, '\n');
+                    cout << "Invalid input!! Please try again: ";
+                    cin >> choice;
+                }
+                if (choice == 1)
+                {
+                    current->status = STATUS_ACCEPTED;
+                    Connection[current->senderIndex][current->receiverIndex] = 1;
+                    Connection[current->receiverIndex][current->senderIndex] = 1;
+                    acceptedRequests[acceptedCount++].senderIndex = current->senderIndex;
+                }
+                else
+                {
+                    current->status = STATUS_REJECTED;
+                }
 
-            if (front != nullptr)
-            {
-                cout << "Process next? (y/n): ";
-                char cont;
-                cin >> cont;
-                if (tolower(cont) != 'y')
-                    break;
+                if (current->next != nullptr)
+                {
+                    cout << "Process next? (y/n): ";
+                    char cont;
+                    cin >> cont;
+                    if (tolower(cont) != 'y')
+                        break;
+                }
             }
+            current = current->next;
         }
         break;
     }

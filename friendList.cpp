@@ -1,15 +1,11 @@
 #include "friendList.h"
-// Constructor for FriendList
 FriendList::FriendList() : top(nullptr) {}
 
-// Get the top node (useful for debugging or further operations)
 FriendNode *FriendList::getTop() const
 {
     return top;
 }
 
-/// @brief Add a new friend to the list
-/// @param f_name The friend's username
 void FriendList::addFriend(string f_name)
 {
     if (f_name.empty())
@@ -45,7 +41,6 @@ void FriendList::displayAllFriends()
     cout << endl;
 }
 
-/// @brief Clear the entire friend list
 void FriendList::clearFriendList()
 {
     FriendNode *current = top;
@@ -57,10 +52,9 @@ void FriendList::clearFriendList()
         current = current->next;
         delete temp;
     }
-    top = nullptr; // Mark the list as empty
+    top = nullptr;
 }
 
-// Destructor to ensure memory cleanup
 FriendList::~FriendList()
 {
     clearFriendList();

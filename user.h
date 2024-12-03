@@ -7,6 +7,7 @@
 #include "notificationList.h"
 #include "friendList.h"
 #include "newsFeed.h"
+#include "messages.h"
 using namespace std;
 
 class User
@@ -25,6 +26,7 @@ private:
     FriendList friend_list;
     NotificationList notification_list;
     NewsFeed news_feed;
+    Messages messages;
     string security_answers[3];
     string security_questions[3];
 
@@ -59,6 +61,7 @@ public:
     // ====== Post Functions ====== //
     void newPost();
     void getLatestPost();
+    void showMyPosts();
     string getPostText();
     string getPostDate();
     string getPostUsername();
@@ -80,4 +83,9 @@ public:
     void showNewsFeed();
     void setNewsFeed(string post, string date, string username);
     void clearNewsFeed();
+
+    //== Messages ==//
+    void sendMessage(string receiver, string content);
+    void showMessages();
+    void showChatWith(string username);
 };

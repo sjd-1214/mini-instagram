@@ -37,7 +37,7 @@ public:
     string getPost() const;
     string getDate() const;
     string getUsername() const;
-
+    void showMyPosts() const;
     /////////////// Destructor //////////////////
     ~PostStack();
 };

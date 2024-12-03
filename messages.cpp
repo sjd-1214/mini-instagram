@@ -1,157 +1,187 @@
 #include "messages.h"
 
-// MessageNode Implementation
-MessageNode::MessageNode(string message) {
-    next = prev = nullptr;
-    this->message = message;
+Messages::Messages()
+{
+    chat_list = nullptr;
 }
 
-string MessageNode::getMessage() const {
-    return message;
-}
-
-// MessageStack Implementation
-MessageStack::MessageStack() {
-    top = nullptr;
-    recipient_name = "";
-}
-
-MessageStack::MessageStack(string friend_username) {
-    top = nullptr;
-    recipient_name = friend_username;
-}
-
-string MessageStack::getName() const {
-    return recipient_name;
-}
-
-void MessageStack::setName(string name) {
-    recipient_name = name;
-}
-
-MessageNode* MessageStack::getTop() const {
-    return top;
-}
-
-bool MessageStack::add_message() {
-    string message;
-    cout << "Enter Your Message: ";
-    getline(cin, message);
-
-    MessageNode* new_message = new MessageNode(message);
-
-    if (top == nullptr) {
-        top = new_message;
-    } else {
-        new_message->prev = top;
-        top->next = new_message;
-        top = new_message;
+void Messages::deleteChatList()
+{
+    ChatNode *current = chat_list;
+    while (current != nullptr)
+    {
+        ChatNode *temp = current;
+        deleteMessages(current->messages);
+        current = current->next;
+        delete temp;
     }
-    return true;
+    chat_list = nullptr;
 }
 
-// ChatNode Implementation
-ChatNode::ChatNode(string username) {
-    next = nullptr;
-    prev = nullptr;
-    message_stack = new MessageStack(username);
-}
-
-// ChatStack Implementation
-ChatStack::ChatStack() {
-    top = nullptr;
-}
-
-bool ChatStack::newChat(string username) {
-    ChatNode* new_chat = new ChatNode(username);
-
-    if (top == nullptr) {
-        top = new_chat;
-    } else {
-        new_chat->prev = top;
-        top->next = new_chat;
-        top = new_chat;
+void Messages::deleteMessages(MessageNode *head)
+{
+    while (head != nullptr)
+    {
+        MessageNode *temp = head;
+        head = head->next;
+        delete temp;
     }
-    return true;
 }
 
-ChatNode* ChatStack::getTop() const {
-    return top;
+MessageNode *Messages::getLastMessage(MessageNode *head)
+{
+    if (head == nullptr)
+        return nullptr;
+
+    MessageNode *current = head;
+    while (current->next != nullptr)
+    {
+        current = current->next;
+    }
+    return current;
 }
 
-// Messages Implementation
-Messages::Messages() {
-    chat = new ChatStack();
+ChatNode *Messages::findChat(string username)
+{
+    ChatNode *current = chat_list;
+    while (current != nullptr)
+    {
+        if (current->username == username)
+            return current;
+        current = current->next;
+    }
+    return nullptr;
 }
 
-void Messages::newChat(string username) {
-    chat->newChat(username);
+void Messages::addMessage(string sender, string receiver, string content)
+{
+    time_t now = time(0);
+    string timestamp = ctime(&now);
+    timestamp = timestamp.substr(0, timestamp.length() - 1);
+
+    MessageNode *newMessage = new MessageNode(sender, content, timestamp);
+
+    ChatNode *senderChat = findChat(sender);
+    if (senderChat == nullptr)
+    {
+        senderChat = new ChatNode(sender);
+        senderChat->next = chat_list;
+        chat_list = senderChat;
+    }
+
+    ChatNode *receiverChat = findChat(receiver);
+    if (receiverChat == nullptr)
+    {
+        receiverChat = new ChatNode(receiver);
+        receiverChat->next = chat_list;
+        chat_list = receiverChat;
+    }
+
+    MessageNode *lastMsgSender = getLastMessage(senderChat->messages);
+    if (lastMsgSender == nullptr)
+    {
+        senderChat->messages = newMessage;
+    }
+    else
+    {
+        lastMsgSender->next = newMessage;
+    }
+
+    MessageNode *receiverCopy = new MessageNode(sender, content, timestamp);
+    MessageNode *lastMsgReceiver = getLastMessage(receiverChat->messages);
+    if (lastMsgReceiver == nullptr)
+    {
+        receiverChat->messages = receiverCopy;
+    }
+    else
+    {
+        lastMsgReceiver->next = receiverCopy;
+    }
 }
 
-bool Messages::send() {
-    string recipient;
-    cout << "To whom you want to send the message: ";
-    getline(cin, recipient);
+void Messages::showChat(string username1, string username2)
+{
+    ChatNode *chat = findChat(username1);
+    if (chat == nullptr)
+    {
+        cout << "No messages found!" << endl;
+        return;
+    }
 
-    bool is_found = false;
-    ChatNode* current = chat->getTop();
+    cout << "\n=== Chat History ===" << endl;
+    MessageNode *current = chat->messages;
+    while (current != nullptr)
+    {
+        cout << "[" << current->timestamp << "] "
+             << ": "
+             << current->content << endl;
+        current = current->next;
+    }
+    cout << "===================" << endl;
+}
 
-    while (current != nullptr) {
-        if (current->message_stack->getName() == recipient) {
-            is_found = true;
-            break;
+void Messages::showInbox(string username)
+{
+    ChatNode *userChat = findChat(username);
+    if (userChat == nullptr || userChat->messages == nullptr)
+    {
+        cout << "No messages in inbox!" << endl;
+        return;
+    }
+
+    cout << "\n=== Message Inbox for " << username << " ===" << endl;
+    ChatNode *current = chat_list;
+    int count = 1;
+
+    while (current != nullptr)
+    {
+        if (current->username != username && hasChat(username, current->username))
+        {
+            // ===== Find last message for preview === //
+            MessageNode *lastMsg = getLastMessage(current->messages);
+            if (lastMsg != nullptr)
+            {
+                cout << count++ << ". Chat with " << current->username << endl;
+                cout << "   Last message: [" << lastMsg->timestamp << "] "
+                     << lastMsg->sender << ": " << lastMsg->content << endl;
+            }
         }
-        current = current->prev;
+        current = current->next;
     }
+    cout << "================================" << endl;
+}
 
-    if (!is_found) {
-        cout << "User NOT FOUND\n";
+bool Messages::hasChat(string username1, string username2)
+{
+    ChatNode *chat1 = findChat(username1);
+    if (chat1 == nullptr)
         return false;
-    }
 
-    if (current->message_stack->add_message()) {
-        cout << "Message SENT\n";
-        return true;
+    MessageNode *current = chat1->messages;
+    while (current != nullptr)
+    {
+        if (current->sender == username2)
+            return true;
+        current = current->next;
     }
-
     return false;
 }
 
-bool Messages::display() {
-    string username;
-    cout << "Enter the username of the recipient: ";
-    getline(cin, username);
-
-    bool is_found = false;
-    ChatNode* current = chat->getTop();
-
-    while (current != nullptr) {
-        if (current->message_stack->getName() == username) {
-            is_found = true;
-            break;
-        }
-        current = current->prev;
+void Messages::loadChat(string username1, string username2)
+{
+    ChatNode *chat1 = findChat(username1);
+    if (chat1 == nullptr)
+    {
+        chat1 = new ChatNode(username1);
+        chat1->next = chat_list;
+        chat_list = chat1;
     }
 
-    if (!is_found) {
-        cout << "User NOT FOUND\n";
-        return false;
-    }
-
-    reversePrint(current->message_stack);
-    return true;
-}
-
-// Helper Function: reversePrint
-void reversePrint(MessageStack* x) {
-    MessageNode* current = x->getTop();
-
-    while (current != nullptr && current->prev != nullptr) {
-        current = current->prev;
-    }
-
-    while (current != nullptr) {
-        cout << current->getMessage() << endl << endl;
-        current = current->next;
+    ChatNode *chat2 = findChat(username2);
+    if (chat2 == nullptr)
+    {
+        chat2 = new ChatNode(username2);
+        chat2->next = chat_list;
+        chat_list = chat2;
     }
 }

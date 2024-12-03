@@ -49,6 +49,8 @@ public:
     void showConnections();
     bool search(string username);
     void showNotifiactions();
+    void showMessages();
+    void sendMessage(string recipient);
     int **updateConnections();
     void signout();
     void home(string username);

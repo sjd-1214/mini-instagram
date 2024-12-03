@@ -1,67 +1,41 @@
-#pragma once
-
-#include <iostream>
 #include <string>
+#include <iostream>
+#include <ctime>
 using namespace std;
-
-class MessageStack; // Forward declaration
-
-void reversePrint(MessageStack *);
 
 struct MessageNode
 {
+    string sender;
+    string content;
+    string timestamp;
     MessageNode *next;
-    MessageNode *prev;
-    string message;
 
-    MessageNode(string message);
-    string getMessage() const;
-};
-
-class MessageStack
-{
-private:
-    string recipient_name;
-    MessageNode *top;
-
-public:
-    MessageStack();
-    MessageStack(string friend_username);
-
-    string getName() const;
-    void setName(string name);
-    MessageNode *getTop() const;
-    bool add_message();
+    MessageNode(string s, string c, string t) : sender(s), content(c), timestamp(t), next(nullptr) {}
 };
 
 struct ChatNode
 {
+    string username;
+    MessageNode *messages;
     ChatNode *next;
-    ChatNode *prev;
-    MessageStack *message_stack;
 
-    ChatNode(string username);
-};
-
-class ChatStack
-{
-private:
-    ChatNode *top;
-
-public:
-    ChatStack();
-    bool newChat(string username);
-    ChatNode *getTop() const;
+    ChatNode(string u) : username(u), messages(nullptr), next(nullptr) {}
 };
 
 class Messages
 {
 private:
-    ChatStack *chat;
+    ChatNode *chat_list;
+    void deleteMessages(MessageNode *head);
+    void deleteChatList();
+    MessageNode *getLastMessage(MessageNode *head);
+    ChatNode *findChat(string username);
 
 public:
     Messages();
-    void newChat(string username);
-    bool send();
-    bool display();
+    void addMessage(string sender, string receiver, string content);
+    void showChat(string username1, string username2);
+    void showInbox(string username);
+    bool hasChat(string username1, string username2);
+    void loadChat(string username1, string username2);
 };

@@ -104,3 +104,23 @@ PostStack::~PostStack()
         delete temp;
     }
 }
+
+void PostStack::showMyPosts() const
+{
+    PostNode *current = top;
+    if (current == nullptr)
+    {
+        cout << "No posts available." << endl;
+        return;
+    }
+
+    cout << "My Posts: " << endl;
+    while (current != nullptr)
+    {
+        cout << "Username: " << current->getUsername() << endl;
+        cout << "Post: " << current->getPost() << endl;
+        cout << "Date: " << current->getDate() << endl;
+        cout << "----------------------" << endl;
+        current = current->getNext();
+    }
+}

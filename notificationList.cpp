@@ -32,6 +32,13 @@ void NotificationList::addNotification(string type, string username)
         newNode->next = top;
         top = newNode;
     }
+    else if (type == "message")
+    {
+        string message = username + messages[3];
+        NotificationNode *newNode = new NotificationNode(type, username, message);
+        newNode->next = top;
+        top = newNode;
+    }
     else
     {
         cout << "Exception" << endl;

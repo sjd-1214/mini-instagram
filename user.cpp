@@ -16,6 +16,7 @@ User::User()
     friend_list = FriendList();
     notification_list = NotificationList();
     news_feed = NewsFeed();
+    messages = Messages();
 }
 
 User::User(string username, string email, string password, string first_name, string last_name, string DOB, char gender)
@@ -108,12 +109,12 @@ bool User::verifySecurityAnswers()
     for (int i = 0; i < 3; i++)
     {
         cout << "Question " << i + 1 << ":" << security_questions[i] << endl;
-        cin >> arr[i];
-        while (arr[i] != security_answers[i])
+        getline(cin, arr[i]);
+        while (arr[i] != security_answers[i] || cin.fail() || security_answers[i].empty() || security_answers[i][0] == ' ')
         {
             cout << "Invalid Answer" << endl;
             cout << security_questions[i] << endl;
-            cin >> arr[i];
+            getline(cin, arr[i]);
         }
     }
     return true;
@@ -126,6 +127,13 @@ void User::setSecurityAnswers()
     {
         cout << security_questions[i] << endl;
         getline(cin, security_answers[i]);
+        while (cin.fail() || security_answers[i].empty() || security_answers[i][0] == ' ')
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input! Please try again: ";
+            getline(cin, security_answers[i]);
+        }
     }
     cout << "Security Answers Set" << endl;
 }
@@ -157,6 +165,10 @@ string User::getPostDate()
 string User::getPostUsername()
 {
     return username;
+}
+void User::showMyPosts()
+{
+    post_stack.showMyPosts();
 }
 
 void User::sendRequest(string sender, int senderIndex, int receiverIndex, int **Connection)
@@ -204,4 +216,18 @@ void User::setNewsFeed(string post, string date, string username)
 void User::clearNewsFeed()
 {
     news_feed.clearNewsFeed();
+}
+void User::sendMessage(string receiver, string content)
+{
+    messages.addMessage(username, receiver, content);
+}
+
+void User::showMessages()
+{
+    messages.showInbox(username);
+}
+
+void User::showChatWith(string other_username)
+{
+    messages.showChat(this->username, other_username);
 }
