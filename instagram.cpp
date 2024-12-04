@@ -59,7 +59,7 @@ void Instagram::showMenu()
     cout << "4. Exit" << endl;
     cout << "Enter your choice: ";
     cin >> choice;
-    while (cin.fail() || choice < 1 || choice > 3)
+    while (cin.fail() || choice < 1 || choice > 4)
     {
         cin.clear();
         cin.ignore(1000, '\n');
