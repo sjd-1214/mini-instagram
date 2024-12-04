@@ -55,7 +55,8 @@ void Instagram::showMenu()
     int choice;
     cout << "1. Create Account" << endl;
     cout << "2. Log In" << endl;
-    cout << "3. Exit" << endl;
+    cout << "3. show connections" << endl;
+    cout << "4. Exit" << endl;
     cout << "Enter your choice: ";
     cin >> choice;
     while (cin.fail() || choice < 1 || choice > 3)
@@ -74,11 +75,11 @@ void Instagram::showMenu()
     case 2:
         logIn();
         break;
-    // case 3:
-    //     showConnections();
-    //     showMenu();
-    //     break;
     case 3:
+        showConnections();
+        showMenu();
+        break;
+    case 4:
         cout << "Goodbye!" << endl;
         break;
     }
@@ -149,7 +150,7 @@ void Instagram::createAccount()
     }
     ///================== DOB =================///
     string DOB;
-    cout << "Enter DOB (DD-MM-YYYY): ";
+    cout << "Enter DOB (DD-MM-YYY): ";
     getline(cin, DOB);
     while (!validate_DOB(DOB))
     {
@@ -423,12 +424,13 @@ void Instagram::home(string username)
     cout << "5. Show My Posts" << endl;
     cout << "6. Show Requests" << endl;
     cout << "7. Show Follow List" << endl;
-    cout << "8. Show Messages" << endl;
-    cout << "9. Sign Out" << endl;
-    cout << "10. Reset Password" << endl;
+    cout << "8. Show Suggestions" << endl;
+    cout << "9. Show Messages" << endl;
+    cout << "10. Sign Out" << endl;
+    cout << "11. Reset Password" << endl;
     cout << "Enter Choice:";
     cin >> choice;
-    while (cin.fail() || choice < 1 || choice > 10)
+    while (cin.fail() || choice < 1 || choice > 11)
     {
         cin.clear();
         cin.ignore(1000, '\n');
@@ -565,24 +567,8 @@ void Instagram::home(string username)
             home(activeuser->user->getusername());
         }
         break;
-    // case 8:
-    //     showSuggestion();
-    //     cout << "Press 1 to go back to home" << endl;
-    //     cin >> subchoice;
-    //     while (cin.fail() || subchoice < 1 || subchoice > 1)
-    //     {
-    //         cin.clear();
-    //         cin.ignore(1000, '\n');
-    //         cout << "Invalid input!! Please try again: ";
-    //         cin >> subchoice;
-    //     }
-    //     if (subchoice == 1)
-    //     {
-    //         home(activeuser->user->getusername());
-    //     }
-    //     break;
     case 8:
-        showMessages();
+        showSuggestion();
         cout << "Press 1 to go back to home" << endl;
         cin >> subchoice;
         while (cin.fail() || subchoice < 1 || subchoice > 1)
@@ -598,9 +584,25 @@ void Instagram::home(string username)
         }
         break;
     case 9:
-        signout();
+        showMessages();
+        cout << "Press 1 to go back to home" << endl;
+        cin >> subchoice;
+        while (cin.fail() || subchoice < 1 || subchoice > 1)
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input!! Please try again: ";
+            cin >> subchoice;
+        }
+        if (subchoice == 1)
+        {
+            home(activeuser->user->getusername());
+        }
         break;
     case 10:
+        signout();
+        break;
+    case 11:
         resetpassword();
         break;
     default:
@@ -709,6 +711,146 @@ void Instagram::showFriendList()
 
     cout << "Friend List for " << activeuser->user->getusername() << ":" << endl;
     activeuser->user->displayAllFriends();
+}
+
+void Instagram::showSuggestion()
+{
+    if (connections == nullptr || activeuser == nullptr)
+    {
+        cout << "Error: No active user or connection matrix not initialized" << endl;
+        return;
+    }
+
+    int active_user_index = getuserindex(activeuser->user->getusername());
+    if (active_user_index == -1)
+    {
+        cout << "Error: Active user not found in the system" << endl;
+        return;
+    }
+
+    int *direct_friends = new int[user_count]();
+    int *suggestions = new int[user_count]();
+    double *suggestion_scores = new double[user_count]();
+    bool *visited = new bool[user_count]();
+    int direct_friend_count = 0;
+    int suggestion_count = 0;
+
+    for (int i = 0; i < user_count; i++)
+    {
+        if (connections[active_user_index][i] == 1)
+        {
+            direct_friends[direct_friend_count++] = i;
+            visited[i] = true;
+        }
+    }
+
+    visited[active_user_index] = true;
+
+    int *queue = new int[user_count]();
+    int front = 0, rear = 0;
+
+    for (int i = 0; i < direct_friend_count; i++)
+    {
+        queue[rear++] = direct_friends[i];
+    }
+
+    while (front < rear)
+    {
+        int current = queue[front++];
+
+        for (int i = 0; i < user_count; i++)
+        {
+            if (connections[current][i] == 1 && !visited[i])
+            {
+                visited[i] = true;
+                suggestions[suggestion_count++] = i;
+                double score = 0.0;
+
+                int mutual_friends = 0;
+                for (int j = 0; j < direct_friend_count; j++)
+                {
+                    if (connections[i][direct_friends[j]] == 1)
+                    {
+                        mutual_friends++;
+                    }
+                }
+                score += 0.5 * (mutual_friends / (double)direct_friend_count);
+
+                BSTNode *suggestion_user = bst->search(getUsernameByIndex(i));
+                if (suggestion_user != nullptr && suggestion_user->user != nullptr)
+                {
+                    score += 0.3;
+                }
+                score += 0.2 * (1.0 / (front + 1));
+
+                suggestion_scores[i] = score * 100;
+            }
+        }
+    }
+
+    for (int i = 0; i < suggestion_count - 1; i++)
+    {
+        for (int j = 0; j < suggestion_count - i - 1; j++)
+        {
+            if (suggestion_scores[suggestions[j]] < suggestion_scores[suggestions[j + 1]])
+            {
+                int temp_suggestion = suggestions[j];
+                suggestions[j] = suggestions[j + 1];
+                suggestions[j + 1] = temp_suggestion;
+            }
+        }
+    }
+
+    if (suggestion_count == 0)
+    {
+        cout << "No friend suggestions available!" << endl;
+    }
+    else
+    {
+        cout << "Friend Suggestions:" << endl;
+        for (int i = 0; i < suggestion_count; i++)
+        {
+            BSTNode *suggestion_user = bst->search(getUsernameByIndex(suggestions[i]));
+            if (suggestion_user != nullptr && suggestion_user->user != nullptr)
+            {
+                cout << i + 1 << ". "
+                     << suggestion_user->user->getusername()
+                     << " (Relevance Score: " << fixed << setprecision(2)
+                     << suggestion_scores[suggestions[i]] << "%)" << endl;
+            }
+        }
+
+        cout << "\nEnter the number of the user to send a friend request (0 to go back): ";
+        int choice;
+        cin >> choice;
+        while (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input!! Please try again: ";
+            cin >> choice;
+        }
+        cin.ignore();
+
+        if (choice > 0 && choice <= suggestion_count)
+        {
+            BSTNode *selected_user = bst->search(getUsernameByIndex(suggestions[choice - 1]));
+            if (selected_user != nullptr && selected_user->user != nullptr)
+            {
+                addfriend(selected_user->user->getusername());
+            }
+        }
+        else if (choice != 0)
+        {
+            cout << "Invalid choice. Returning to home menu." << endl;
+        }
+    }
+
+    delete[] direct_friends;
+    delete[] suggestions;
+    delete[] suggestion_scores;
+    delete[] visited;
+    delete[] queue;
 }
 
 string Instagram::getUsernameByIndex(int index)
